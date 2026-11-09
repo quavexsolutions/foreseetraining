@@ -2512,8 +2512,8 @@ function createSub(t,b,method,auto,po){if(LIVE)return liveCheckout({kind:'plan',
   if(o.status==='Paid')sendEmail(c.email,`Your ${TIERS[t].name} plan is active`,`<p>Hello ${esc(c.name)},</p><p>${esc(S.school.name)} now has the <b>${TIERS[t].name}</b> plan until <b>${fmtD(now+YEAR)}</b>. Invite as many staff as you need.</p><p>${auto?'It renews automatically. We’ll remind you 60 and 30 days before.':'Automatic renewal is off, so the plan will end on that date.'}</p>`,{type:'go',role:'school',view:'school',label:'Go to your dashboard'});
   save();go('order',{ref})}
 function subOrderView(o){const paid=o.status==='Paid',x=S.subscription;return `<section class="wrap"><div class="auth-shell" style="max-width:760px"><div class="card raised stack" style="gap:18px">
- <span class="pill ${paid?'ok':'warn'}" style="align-self:flex-start">${esc(o.status)}</span><h2>${paid?(o.upgrade?'Upgrade confirmed':'Your plan is active'):'Invoice sent'}</h2>
- <p class="muted">${paid?`Invite as many staff as you need. ${x&&x.autoRenew?`Your plan renews automatically on ${fmtD(x.end)}.`:x?`Your plan ends on ${fmtD(x.end)}.`:''}`:`We’ve emailed invoice ${o.invoice}. Your plan starts as soon as payment is confirmed.`}</p>
+ <span class="pill ${paid?'ok':'warn'}" style="align-self:flex-start">${paid?esc(o.status):o.method==='Card'?'Confirming payment':esc(o.status)}</span><h2>${paid?(o.upgrade?'Upgrade confirmed':'Your plan is active'):o.method==='Card'?'Confirming your payment':'Invoice sent'}</h2>
+ <p class="muted">${paid?`Invite as many staff as you need. ${x&&x.autoRenew?`Your plan renews automatically on ${fmtD(x.end)}.`:x?`Your plan ends on ${fmtD(x.end)}.`:''}`:o.method==='Card'?`Stripe has taken your card payment and is confirming it with us. This usually takes a few seconds. Refresh in a minute; if it still says this after 10 minutes, email support@foreseetraining.com with your order reference. <button class="btn-link" id="ord-refresh">Refresh now</button>`:`We’ve emailed invoice ${o.invoice}. Your plan starts as soon as payment is confirmed.`}</p>
  <dl class="kv"><dt>Order reference</dt><dd class="mono">${o.ref}</dd><dt>Invoice</dt><dd class="mono">${o.invoice}</dd><dt>Plan</dt><dd>${esc(orderTitle(o))}</dd><dt>Total</dt><dd class="num">${money(o.total)}</dd><dt>Date</dt><dd>${fmtD(o.at)}</dd></dl>
  <div class="row"><button class="btn btn-primary" data-go="school">Go to dashboard</button><button class="btn btn-ghost" data-go="plan">View your plan</button><button class="btn btn-ghost" id="ord-inv">View invoice</button></div></div></div></section>`}
 VIEWS.plan=()=>{if(!guard('school'))return false;const x=S.subscription;
@@ -2594,9 +2594,9 @@ function placeOrder(n,method,po){if(LIVE)return liveCheckout({kind:S.course.lice
 }
 VIEWS.order=()=>{if(!guard('school'))return false;const o=S.orders.find(x=>x.ref===PARAMS.ref)||S.orders[S.orders.length-1];if(!o)return VIEWS.school();if(o.sub)return subOrderView(o);const paid=o.status==='Paid';return `
 <section class="wrap"><div class="auth-shell" style="max-width:760px"><div class="card raised stack" style="gap:18px">
- <span class="pill ${paid?'ok':'warn'}" style="align-self:flex-start">${esc(o.status)}</span>
- <h2>${paid?'Payment confirmed':'Invoice sent'}</h2>
- <p class="muted">${paid?`${o.licence?'Your school licence is active.':`Your ${o.places} places are ready.`} We’ve emailed a payment confirmation and your invoice.`:`We’ve emailed invoice ${o.invoice}. Your places will be released as soon as payment is confirmed.`}</p>
+ <span class="pill ${paid?'ok':'warn'}" style="align-self:flex-start">${paid?esc(o.status):o.method==='Card'?'Confirming payment':esc(o.status)}</span>
+ <h2>${paid?'Payment confirmed':o.method==='Card'?'Confirming your payment':'Invoice sent'}</h2>
+ <p class="muted">${paid?`${o.licence?'Your school licence is active.':`Your ${o.places} places are ready.`} We’ve emailed a payment confirmation and your invoice.`:o.method==='Card'?`Stripe has taken your card payment and is confirming it with us. This usually takes a few seconds. Refresh in a minute; if it still says this after 10 minutes, email support@foreseetraining.com with your order reference. <button class="btn-link" id="ord-refresh">Refresh now</button>`:`We’ve emailed invoice ${o.invoice}. Your places will be released as soon as payment is confirmed.`}</p>
  <dl class="kv"><dt>Order reference</dt><dd class="mono">${o.ref}</dd><dt>Invoice</dt><dd class="mono">${o.invoice}</dd><dt>Course</dt><dd>${esc(S.course.title)}</dd><dt>${o.licence?'Licence':'Places'}</dt><dd class="num">${o.licence?'12 months, unlimited families':o.places}</dd><dt>Total</dt><dd class="num">${money(o.total)}</dd><dt>Date</dt><dd>${fmtD(o.at)}</dd></dl>
  <div class="row">${paid?`<button class="btn btn-primary" data-go="attendees">${o.licence?'Get your join link':'Register your attendees'}</button>`:''}<button class="btn btn-ghost" id="ord-inv">View invoice</button><button class="btn btn-ghost" data-go="school">Go to dashboard</button></div>
 </div></div></section>`};
@@ -3360,6 +3360,8 @@ function liveChangeEmail(){
     try{await liveRefresh()}catch(x){}
     closeModal();toast('Email changed. Sign in with '+esc(nu)+' from now on.');render()};
 }
+document.addEventListener('click',async e=>{const b=e.target&&e.target.closest&&e.target.closest('#ord-refresh');if(!b)return;e.preventDefault();
+  if(!LIVE){render();return}busyBtn(b,true,'Checking…');try{await liveRefresh()}catch(x){}render()});
 function liveAsk(what){toast(`To ${what}, email ${esc((window.FT_CONFIG||{}).supportEmail||'support@foreseetraining.com')} and we’ll do it for you.`)}
 
 // School administration
