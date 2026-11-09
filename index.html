@@ -3240,12 +3240,13 @@ function busyBtn(sel,on,label){const b=typeof sel==='string'?$(sel):sel;if(!b)re
 async function liveBoot(hash){
   const qp=new URLSearchParams(location.search);
   if(qp.get('invite')){VIEW='activate';PARAMS={token:qp.get('invite')}}
+  if(qp.get('paid'))VIEW='paying';
   render();
   let session=null;try{session=(await FT.sb.auth.getSession()).data.session}catch(e){}
   if(session&&VIEW!=='activate'){
     try{await liveRefresh()}catch(e){liveErr(e)}
     const paid=qp.get('paid');
-    if(paid){toast('Confirming your payment…');for(let i=0;i<10;i++){const o=S.orders.find(x=>x.ref===paid);if(o&&o.status==='Paid')break;await new Promise(r=>setTimeout(r,1500));try{await liveRefresh()}catch(e){}}go('order',{ref:paid})}
+    if(paid){VIEW='paying';render();for(let i=0;i<20;i++){const o=S.orders.find(x=>x.ref===paid);if(o&&o.status==='Paid')break;await new Promise(r=>setTimeout(r,1500));try{await liveRefresh()}catch(e){}}go('order',{ref:paid})}
     else if(qp.get('cancelled')){toast('Payment cancelled. Nothing has been charged.');liveHome()}
     else if(hash&&VIEWS[hash]&&!PUBLIC_TOKENS.includes(hash))go(hash);
     else if(['home','login','register','verify'].includes(VIEW))liveHome();
@@ -3362,6 +3363,7 @@ function liveChangeEmail(){
 }
 document.addEventListener('click',async e=>{const b=e.target&&e.target.closest&&e.target.closest('#ord-refresh');if(!b)return;e.preventDefault();
   if(!LIVE){render();return}busyBtn(b,true,'Checking…');try{await liveRefresh()}catch(x){}render()});
+VIEWS.paying=()=>`<section class="wrap"><div class="auth-shell" style="max-width:560px"><div class="card raised stack" style="gap:14px;text-align:center;align-items:center"><span class="pill warn">Confirming payment</span><h2>Confirming your payment…</h2><p class="muted">Thank you. Stripe is confirming your card payment with us. This usually takes a few seconds, so please keep this page open.</p></div></div></section>`;
 function liveAsk(what){toast(`To ${what}, email ${esc((window.FT_CONFIG||{}).supportEmail||'support@foreseetraining.com')} and we’ll do it for you.`)}
 
 // School administration
