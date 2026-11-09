@@ -915,6 +915,9 @@ const fmtDT=ts=>new Date(ts).toLocaleString('en-GB',{day:'numeric',month:'short'
 const uid=()=>Math.random().toString(36).slice(2,10);
 const rnd6=()=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return String(a[0]%1000000).padStart(6,'0')}catch(e){return String(Math.floor(Math.random()*1e6)).padStart(6,'0')}};
 const emailOk=e=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(e).trim());
+const PERSONAL_RE=/^(gmail|googlemail|yahoo|ymail|rocketmail|hotmail|outlook|live|msn|windowslive|passport|aol|aim|icloud|me|mac|proton|protonmail|pm|tutanota|tuta|gmx|web|mail|email|inbox|yandex|zoho|fastmail|hey|qq|163|126|sina|mail\.ru|rambler|btinternet|btopenworld|talk21|sky|virginmedia|virgin|ntlworld|blueyonder|talktalk|tiscali|plusnet|tesco|o2|orange|wanadoo|freeserve|lineone|eclipse|aol\.co|hushmail|lycos|rediffmail|libero|laposte|free|t-online|seznam|wp|onet|interia)\.(com|net|co\.uk|uk|de|fr|it|es|ie|ca|com\.au|co\.nz|co\.in|in|ru|cn|pl|cz|me|ch|at|nl|be|se|dk|no|jp|com\.br|br|co\.za|eu|io|ch)$/;
+const personalEmail=e=>{const d=String(e).trim().toLowerCase().split('@')[1]||'';return PERSONAL_RE.test(d)};
+const WORK_MSG='Please use your work email, like name@school.sch.uk. Personal addresses such as Gmail, Outlook, Hotmail, Yahoo or iCloud can’t be used for a school account.';
 const clone=o=>JSON.parse(JSON.stringify(o));
 const DAY=864e5;
 
@@ -2284,7 +2287,7 @@ VIEWS.register=()=>{const pf=(PARAMS.prefill)||{};return `
  <h3>About you</h3>
  <div class="form-grid">
   ${fld('r-name','Full name','text',pf.name,'name')}${fld('r-role','Job title or role','text','','organization-title','e.g. Designated Safeguarding Lead')}
-  ${fld('r-email','Work email','email','','email','We’ll send a six-digit code to this address','full')}
+  ${fld('r-email','Work email','email','','email','Your school or organisation email, not a personal one. We’ll send a six-digit code to this address.','full')}
  </div>
  <h3>Your school</h3>
  <div class="form-grid">
@@ -2305,7 +2308,7 @@ AFTER.register=()=>{
     const v=id=>$('#'+id).value.trim();const err=(id,m)=>{$('#'+id+'-e').textContent=m||'';$('#'+id).classList.toggle('invalid',!!m);if(m){if(ok)$('#'+id).focus();ok=false}};
     ['r-name','r-role','r-email','r-school','r-addr','r-pc','r-tel','r-pw','r-pw2'].forEach(id=>{$('#'+id+'-e').textContent='';$('#'+id).classList.remove('invalid')});
     [['r-name','Enter your full name'],['r-role','Enter your job title or role']].forEach(([id,m])=>{if(!v(id))err(id,m)});
-    if(!emailOk(v('r-email')))err('r-email','Enter a valid work email address, like name@school.sch.uk');
+    if(!emailOk(v('r-email')))err('r-email','Enter a valid work email address, like name@school.sch.uk');else if(personalEmail(v('r-email')))err('r-email',WORK_MSG);
     if(!v('r-school'))err('r-school','Enter your school’s name');
     if(!v('r-addr'))err('r-addr','Enter your school’s address');
     if(!/^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i.test(v('r-pc')))err('r-pc','Enter a UK postcode, like TN23 1AA');
@@ -2399,7 +2402,7 @@ function changeEmail(){if(LIVE)return liveChangeEmail();
   const send=()=>{code=rnd6();sendEmail(nu,'Confirm your new Foresee email',`<p>We received a request to change the sign-in email for a Foresee Training account from <b>${esc(cur)}</b> to <b>${esc(nu)}</b>.</p><p>Enter this code to confirm it:</p><p><span class="e-code">${code}</span></p><p>It expires in ${S.cfg.codeMinutes} minutes.</p>`)};
   $('#ce-again',m).onclick=()=>{send();ceMsg('A new code is on its way. (Prototype: see the Prototype panel inbox.)','')};
   $('#ce',m).onsubmit=e=>{e.preventDefault();
-    if(!code){nu=$('#ce-new').value.trim().toLowerCase();if(!emailOk(nu))return ceMsg('Enter a valid email address.');if(nu===cur.toLowerCase())return ceMsg('That’s the email you already use.');
+    if(!code){nu=$('#ce-new').value.trim().toLowerCase();if(!emailOk(nu))return ceMsg('Enter a valid email address.');if(nu===cur.toLowerCase())return ceMsg('That’s the email you already use.');if(S.session.role==='school'&&personalEmail(nu))return ceMsg(WORK_MSG);
       if(S.school.contacts.some(c=>c.email.toLowerCase()===nu)||S.attendees.some(a=>a.email.toLowerCase()===nu))return ceMsg('That email already has a Foresee account.');
       const pw=people().map(p=>p.password).find(Boolean);if(pw&&pw!==$('#ce-pw').value)return ceMsg('Your password is not right.');
       send();ceStep2(nu);ceMsg('Check your new inbox for the code. (Prototype: see the Prototype panel inbox.)','');return}
@@ -2832,7 +2835,7 @@ AFTER.account=()=>{
   $('#acc').onsubmit=e=>{e.preventDefault();const v=id=>$('#'+id).value.trim();if(!emailOk(v('ac-email'))){$('#ac-msg').innerHTML='<div class="notice bad small">Enter a valid email.</div>';return}if(LIVE)return liveCall('account',{action:'update_school',school:{name:v('ac-school'),address:v('ac-addr'),postcode:v('ac-pc'),phone:v('ac-tel')},contact:{name:v('ac-name'),role:v('ac-role')}},'Details saved.');Object.assign(S.school,{name:v('ac-school'),address:v('ac-addr'),postcode:v('ac-pc'),phone:v('ac-tel')});Object.assign(S.school.contacts[0],{name:v('ac-name'),role:v('ac-role')});audit('School details updated');save();toast('Details saved.');render()};
   $('#ac-pw').onclick=()=>forgot();
   $('#ac-em').onclick=()=>changeEmail();
-  $('#ac-add').onclick=()=>{const m=modal('Invite an administrator',`<form id="adm" class="stack"><div class="field"><label for="ad-name">Full name</label><input type="text" id="ad-name"></div><div class="field"><label for="ad-email">Work email</label><input type="email" id="ad-email"></div><div id="ad-msg"></div><button class="btn btn-primary" type="submit">Send invitation</button></form>`);$('#adm',m).onsubmit=e=>{e.preventDefault();const n=$('#ad-name').value.trim(),em=$('#ad-email').value.trim();if(!n||!emailOk(em)){$('#ad-msg').innerHTML='<div class="notice bad small">Enter a name and valid email.</div>';return}if(LIVE)return liveCall('account',{action:'invite_admin',name:n,email:em},'Invitation sent to '+esc(em)+'.');S.school.contacts.push({name:n,role:'Administrator',email:em,password:'',primary:false});sendEmail(em,'You’ve been added as a school administrator',`<p>${esc(S.school.contacts[0].name)} has added you as an administrator for ${esc(S.school.name)} on Foresee Training.</p>`);audit('Invited administrator '+n);save();closeModal();render()}};
+  $('#ac-add').onclick=()=>{const m=modal('Invite an administrator',`<form id="adm" class="stack"><div class="field"><label for="ad-name">Full name</label><input type="text" id="ad-name"></div><div class="field"><label for="ad-email">Work email</label><input type="email" id="ad-email"></div><div id="ad-msg"></div><button class="btn btn-primary" type="submit">Send invitation</button></form>`);$('#adm',m).onsubmit=e=>{e.preventDefault();const n=$('#ad-name').value.trim(),em=$('#ad-email').value.trim();if(!n||!emailOk(em)){$('#ad-msg').innerHTML='<div class="notice bad small">Enter a name and valid email.</div>';return}if(personalEmail(em)){$('#ad-msg').innerHTML=`<div class="notice bad small">${WORK_MSG}</div>`;return}if(LIVE)return liveCall('account',{action:'invite_admin',name:n,email:em},'Invitation sent to '+esc(em)+'.');S.school.contacts.push({name:n,role:'Administrator',email:em,password:'',primary:false});sendEmail(em,'You’ve been added as a school administrator',`<p>${esc(S.school.contacts[0].name)} has added you as an administrator for ${esc(S.school.name)} on Foresee Training.</p>`);audit('Invited administrator '+n);save();closeModal();render()}};
 };
 
 /* ---------- Learner: activation, dashboard, lesson, assessment, certificate ---------- */
@@ -3339,7 +3342,7 @@ function liveChangeEmail(){
   const nice=e=>{const t=(e&&e.message)||'';return /registered|exists|already/i.test(t)?'That email already has a Foresee account.':/rate|seconds|too many/i.test(t)?'Please wait a minute before asking for another code.':'We couldn’t send the code. Please try again.'};
   $('#ce-again',m).onclick=async()=>{try{await ask();ceMsg('A new code is on its way. Check your spam folder too.','')}catch(e){ceMsg(nice(e))}};
   $('#ce',m).onsubmit=async e=>{e.preventDefault();
-    if(step===1){nu=$('#ce-new').value.trim().toLowerCase();if(!emailOk(nu))return ceMsg('Enter a valid email address.');if(nu===cur.toLowerCase())return ceMsg('That’s the email you already use.');
+    if(step===1){nu=$('#ce-new').value.trim().toLowerCase();if(!emailOk(nu))return ceMsg('Enter a valid email address.');if(nu===cur.toLowerCase())return ceMsg('That’s the email you already use.');if(S.session.role==='school'&&personalEmail(nu))return ceMsg(WORK_MSG);
       busyBtn('#ce-btn',true,'Sending…');
       try{const r=await FT.sb.auth.signInWithPassword({email:cur,password:$('#ce-pw').value});if(r.error){busyBtn('#ce-btn',false);return ceMsg('Your password is not right.')}}catch(x){busyBtn('#ce-btn',false);return ceMsg('We couldn’t reach the server. Check your connection and try again.')}
       try{await ask()}catch(x){busyBtn('#ce-btn',false);return ceMsg(nice(x))}
