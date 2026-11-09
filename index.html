@@ -915,7 +915,7 @@ const fmtDT=ts=>new Date(ts).toLocaleString('en-GB',{day:'numeric',month:'short'
 const uid=()=>Math.random().toString(36).slice(2,10);
 const rnd6=()=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return String(a[0]%1000000).padStart(6,'0')}catch(e){return String(Math.floor(Math.random()*1e6)).padStart(6,'0')}};
 const pwBad=p=>!(String(p).length>=8&&/[a-z]/.test(p)&&/[A-Z]/.test(p)&&/\d/.test(p)&&/[^A-Za-z0-9]/.test(p));
-const PW_RULE='At least 8 characters, with a capital letter, a small letter, a number and a symbol (like ! or ?)';
+const PW_RULE='At least 8 characters, including at least one capital letter, at least one small letter, at least one number and at least one symbol (like ! or ?)';
 const emailOk=e=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(e).trim());
 const PERSONAL_RE=/^(gmail|googlemail|yahoo|ymail|rocketmail|hotmail|outlook|live|msn|windowslive|passport|aol|aim|icloud|me|mac|proton|protonmail|pm|tutanota|tuta|gmx|web|mail|email|inbox|yandex|zoho|fastmail|hey|qq|163|126|sina|mail\.ru|rambler|btinternet|btopenworld|talk21|sky|virginmedia|virgin|ntlworld|blueyonder|talktalk|tiscali|plusnet|tesco|o2|orange|wanadoo|freeserve|lineone|eclipse|aol\.co|hushmail|lycos|rediffmail|libero|laposte|free|t-online|seznam|wp|onet|interia)\.(com|net|co\.uk|uk|de|fr|it|es|ie|ca|com\.au|co\.nz|co\.in|in|ru|cn|pl|cz|me|ch|at|nl|be|se|dk|no|jp|com\.br|br|co\.za|eu|io|ch)$/;
 const personalEmail=e=>{const d=String(e).trim().toLowerCase().split('@')[1]||'';return PERSONAL_RE.test(d)};
@@ -2315,7 +2315,7 @@ AFTER.register=()=>{
     if(!v('r-addr'))err('r-addr','Enter your school’s address');
     if(!/^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i.test(v('r-pc')))err('r-pc','Enter a UK postcode, like TN23 1AA');
     if(v('r-tel').replace(/\D/g,'').length<10)err('r-tel','Enter a telephone number with at least 10 digits');
-    const pw=$('#r-pw').value;if(pwBad(pw))err('r-pw','Your password needs at least 8 characters, with a capital letter, a small letter, a number and a symbol.');
+    const pw=$('#r-pw').value;if(pwBad(pw))err('r-pw','Your password needs at least 8 characters, including at least one capital letter, at least one small letter, at least one number and at least one symbol (like ! or ?).');
     if($('#r-pw2').value!==pw)err('r-pw2','The passwords do not match');
     $('#r-terms-e').textContent=$('#r-terms').checked?'':'Please agree to the terms to continue';if(!$('#r-terms').checked)ok=false;
     if(!ok)return;
@@ -2418,7 +2418,7 @@ function forgot(){if(LIVE)return liveForgot();
   $('#fp',m).onsubmit=e=>{e.preventDefault();
     if(!code){const em=$('#fp-email').value.trim().toLowerCase();who=S.school.contacts.find(c=>c.email.toLowerCase()===em)||S.attendees.find(a=>a.email.toLowerCase()===em);code=rnd6();if(who)sendEmail(who.email,'Reset your Foresee password',`<p>Your password reset code is:</p><p><span class="e-code">${code}</span></p><p>It expires in ${S.cfg.codeMinutes} minutes. If you didn’t ask to reset your password, contact your school or our support team.</p>`);$('#fp-step2').hidden=false;$('#fp-btn').textContent='Set new password';$('#fp-msg').innerHTML='<div class="notice small">If that email is registered, a code is on its way. (Prototype: see the Prototype panel inbox.)</div>';return}
     const pw=$('#fp-pw').value;if($('#fp-code').value!==code){$('#fp-msg').innerHTML='<div class="notice bad small">That code is not right.</div>';return}
-    if(pwBad(pw)){$('#fp-msg').innerHTML='<div class="notice bad small">Your password needs at least 8 characters, with a capital letter, a small letter, a number and a symbol.</div>';return}
+    if(pwBad(pw)){$('#fp-msg').innerHTML='<div class="notice bad small">Your password needs at least 8 characters, including at least one capital letter, at least one small letter, at least one number and at least one symbol (like ! or ?).</div>';return}
     if(who){who.password=pw;sendEmail(who.email,'Your password was changed','<p>Your Foresee password was just changed. If this wasn’t you, contact support straight away.</p>')}save();closeModal();toast('Password updated. You can now sign in.');
   };
 }
@@ -2846,7 +2846,7 @@ VIEWS.activate=()=>{if(LIVE)return liveActivateView();const a=S.attendees.find(x
  <div class="field"><label for="ac-p1">Create a password</label><div class="pw-wrap"><input type="password" id="ac-p1" autocomplete="new-password"><button type="button">Show</button></div><span class="hint">${PW_RULE}</span></div>
  <div class="field"><label for="ac-p2">Confirm password</label><div class="pw-wrap"><input type="password" id="ac-p2" autocomplete="new-password"><button type="button">Show</button></div></div>
  <div id="act-msg"></div><button class="btn btn-primary" type="submit">Activate account</button></form></div></section>`};
-AFTER.activate=()=>{if(LIVE)return liveActivateBind();$('#act').onsubmit=e=>{e.preventDefault();const a=S.attendees.find(x=>x.id===PARAMS.id);const p=$('#ac-p1').value;if(pwBad(p)){$('#act-msg').innerHTML='<div class="notice bad small">Your password needs at least 8 characters, with a capital letter, a small letter, a number and a symbol.</div>';return}if(p!==$('#ac-p2').value){$('#act-msg').innerHTML='<div class="notice bad small">The passwords do not match.</div>';return}a.password=p;a.activated=true;a.invite='Accepted';S.session={role:'learner',user:a.id};audit('Account activated',a.name);save();toast('Account activated.');go('learner')}};
+AFTER.activate=()=>{if(LIVE)return liveActivateBind();$('#act').onsubmit=e=>{e.preventDefault();const a=S.attendees.find(x=>x.id===PARAMS.id);const p=$('#ac-p1').value;if(pwBad(p)){$('#act-msg').innerHTML='<div class="notice bad small">Your password needs at least 8 characters, including at least one capital letter, at least one small letter, at least one number and at least one symbol (like ! or ?).</div>';return}if(p!==$('#ac-p2').value){$('#act-msg').innerHTML='<div class="notice bad small">The passwords do not match.</div>';return}a.password=p;a.activated=true;a.invite='Accepted';S.session={role:'learner',user:a.id};audit('Account activated',a.name);save();toast('Account activated.');go('learner')}};
 
 VIEWS.learner=()=>{if(!guard('learner'))return false;const a=learner();if(!a){S.session={role:'public',user:null};return VIEWS.home()}
   const mine=S.attendees.filter(x=>x.email.toLowerCase()===a.email.toLowerCase()&&(x.activated||x.id===a.id));const ls=allLessons(),st=statusOf(a);const nextIdx=ls.findIndex(({l})=>!lessonState(a,l).done);const allDone=nextIdx===-1;
@@ -2978,7 +2978,7 @@ AFTER.join=()=>{if(LIVE){const ji=$('#j-code');ji.addEventListener('change',live
   if(!picked.length)return bad('Choose at least one course.');
   if(!name)return bad('Enter your name.');
   if(!emailOk(em))return bad('Enter a valid email address, like name@example.com.');
-  if(pwBad(pw))return bad('Your password needs at least 8 characters, with a capital letter, a small letter, a number and a symbol.');
+  if(pwBad(pw))return bad('Your password needs at least 8 characters, including at least one capital letter, at least one small letter, at least one number and at least one symbol (like ! or ?).');
   if(!$('#j-ok').checked)return bad('Please agree to the terms to continue.');
   const fresh=picked.filter(id=>!S.attendees.some(a=>a.course===id&&a.email.toLowerCase()===em.toLowerCase()));
   if(!fresh.length)return bad('You’ve already joined with this email. <button type="button" class="btn-link" data-go="login">Sign in</button> instead.');
@@ -3284,7 +3284,7 @@ function liveForgot(){
   $('#fp',m).onsubmit=async e=>{e.preventDefault();const msg=(t,k)=>$('#fp-msg').innerHTML=`<div class="notice ${k||'bad'} small">${t}</div>`;
     if(!sent){em=$('#fp-email').value.trim().toLowerCase();if(!emailOk(em))return msg('Enter a valid email address.');busyBtn('#fp-btn',true,'Sending…');
       try{await FT.sb.auth.resetPasswordForEmail(em)}catch(e){}busyBtn('#fp-btn',false);sent=true;$('#fp-step2').hidden=false;$('#fp-btn').textContent='Set new password';msg('If that email is registered, a code is on its way. Check your spam folder too.','');return}
-    const code=$('#fp-code').value.trim(),pw=$('#fp-pw').value;if(!/^\d{6}$/.test(code))return msg('Enter the six-digit code from the email.');if(pwBad(pw))return msg('Your password needs at least 8 characters, with a capital letter, a small letter, a number and a symbol.');
+    const code=$('#fp-code').value.trim(),pw=$('#fp-pw').value;if(!/^\d{6}$/.test(code))return msg('Enter the six-digit code from the email.');if(pwBad(pw))return msg('Your password needs at least 8 characters, including at least one capital letter, at least one small letter, at least one number and at least one symbol (like ! or ?).');
     busyBtn('#fp-btn',true,'Saving…');
     try{let r=await FT.sb.auth.verifyOtp({email:em,token:code,type:'recovery'});if(r.error)throw r.error;r=await FT.sb.auth.updateUser({password:pw});if(r.error)throw r.error}catch(e){busyBtn('#fp-btn',false);return msg('That code is not right or has expired. Send a new one and try again.')}
     closeModal();toast('Password updated. You’re signed in.');try{await liveRefresh()}catch(e){}liveHome()};
@@ -3303,7 +3303,7 @@ async function liveActivateBind(){
   $('#act-intro').innerHTML=(info.kind==='admin'?`You’ve been invited to help run <b>${esc(info.school)}</b>’s training.`:`You’ve been enrolled on <b>${esc(info.course)}</b>.`)+` Create a password to activate your account. You’ll sign in with <b>${esc(info.email)}</b>.`;
   $('#act-fields').hidden=false;
   $('#act').onsubmit=async e=>{e.preventDefault();const p=$('#ac-p1').value,bad=x=>$('#act-msg').innerHTML=`<div class="notice bad small">${x}</div>`;
-    if(pwBad(p))return bad('Your password needs at least 8 characters, with a capital letter, a small letter, a number and a symbol.');if(p!==$('#ac-p2').value)return bad('The passwords do not match.');
+    if(pwBad(p))return bad('Your password needs at least 8 characters, including at least one capital letter, at least one small letter, at least one number and at least one symbol (like ! or ?).');if(p!==$('#ac-p2').value)return bad('The passwords do not match.');
     busyBtn('#act-btn',true,'Activating…');
     try{const r=await FT.call('public',{action:'activate',token:t,password:p});
       if(r.exists){busyBtn('#act-btn',false);$('#act-fields').hidden=true;$('#act-msg').innerHTML=`<div class="notice"><span>You already have a Foresee account with <b>${esc(r.email)}</b>. Sign in with your existing password and your new ${info.kind==='admin'?'school':'course'} will be there. <button type="button" class="btn-link" data-go="login">Sign in</button></span></div>`;bindCommon($('#act'));return}
@@ -3321,7 +3321,7 @@ async function liveJoinInfo(){const inp=$('#j-code');if(!inp)return;const code=i
 async function liveJoin(code,name,em,pw,bad){
   const picked=$$('.j-course').filter(x=>x.checked).map(x=>x.value);const signedIn=S.session.role==='learner';
   if(!picked.length)return bad('Choose at least one course.');
-  if(!signedIn){if(!name)return bad('Enter your name.');if(!emailOk(em))return bad('Enter a valid email address, like name@example.com.');if(pwBad(pw))return bad('Your password needs at least 8 characters, with a capital letter, a small letter, a number and a symbol.')}
+  if(!signedIn){if(!name)return bad('Enter your name.');if(!emailOk(em))return bad('Enter a valid email address, like name@example.com.');if(pwBad(pw))return bad('Your password needs at least 8 characters, including at least one capital letter, at least one small letter, at least one number and at least one symbol (like ! or ?).')}
   if(!$('#j-ok').checked)return bad('Please agree to the terms to continue.');
   const btn=$('#jf button[type=submit]');busyBtn(btn,true,'Joining…');
   try{const r=await FT.call('public',{action:'join',code,courses:picked,name,email:em,password:pw});
