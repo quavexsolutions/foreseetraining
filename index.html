@@ -2385,6 +2385,28 @@ AFTER.login=()=>{
     $('#l-msg').innerHTML='<div class="notice bad">The email or password is not right. Check them and try again.</div>';
   };
 };
+/* ---------- Change sign-in email: password check, then a six-digit code sent to the NEW address ---------- */
+function myEmail(){if(LIVE)return S.me||'';if(S.session.role==='school')return (S.school.contacts[0]||{}).email||'';const a=learner();return a?a.email:''}
+function changeEmailModal(){const m=modal('Change your email',`<form id="ce" class="stack" novalidate><p class="muted small">You sign in with <b>${esc(myEmail())}</b>. We’ll send a six-digit code to your new address to check it’s yours.</p>
+ <div id="ce-step1" class="stack"><div class="field"><label for="ce-new">New email address</label><input type="email" id="ce-new" autocomplete="email"></div><div class="field"><label for="ce-pw">Your current password</label><div class="pw-wrap"><input type="password" id="ce-pw" autocomplete="current-password"><button type="button">Show</button></div></div></div>
+ <div id="ce-step2" hidden class="stack"><div class="field"><label for="ce-code" id="ce-code-l">Six-digit code</label><input type="text" id="ce-code" inputmode="numeric" maxlength="6" class="mono" autocomplete="one-time-code"></div><button type="button" class="btn-link small" id="ce-again" style="align-self:flex-start">Send a new code</button></div>
+ <div id="ce-msg" aria-live="polite"></div><button class="btn btn-primary" type="submit" id="ce-btn">Send code</button></form>`);bindCommon(m);return m}
+function ceMsg(t,k){$('#ce-msg').innerHTML=`<div class="notice ${k===undefined?'bad':k} small"><span>${t}</span></div>`}
+function ceStep2(to){$('#ce-step1').hidden=true;$('#ce-step2').hidden=false;$('#ce-code').value='';$('#ce-code-l').textContent='Code sent to '+to;$('#ce-btn').textContent='Confirm new email';$('#ce-code').focus()}
+function changeEmail(){if(LIVE)return liveChangeEmail();
+  const m=changeEmailModal();const cur=myEmail();let code=null,nu='';
+  const people=()=>S.session.role==='school'?[S.school.contacts[0]]:S.attendees.filter(x=>x.email.toLowerCase()===cur.toLowerCase());
+  const send=()=>{code=rnd6();sendEmail(nu,'Confirm your new Foresee email',`<p>We received a request to change the sign-in email for a Foresee Training account from <b>${esc(cur)}</b> to <b>${esc(nu)}</b>.</p><p>Enter this code to confirm it:</p><p><span class="e-code">${code}</span></p><p>It expires in ${S.cfg.codeMinutes} minutes.</p>`)};
+  $('#ce-again',m).onclick=()=>{send();ceMsg('A new code is on its way. (Prototype: see the Prototype panel inbox.)','')};
+  $('#ce',m).onsubmit=e=>{e.preventDefault();
+    if(!code){nu=$('#ce-new').value.trim().toLowerCase();if(!emailOk(nu))return ceMsg('Enter a valid email address.');if(nu===cur.toLowerCase())return ceMsg('That’s the email you already use.');
+      if(S.school.contacts.some(c=>c.email.toLowerCase()===nu)||S.attendees.some(a=>a.email.toLowerCase()===nu))return ceMsg('That email already has a Foresee account.');
+      const pw=people().map(p=>p.password).find(Boolean);if(pw&&pw!==$('#ce-pw').value)return ceMsg('Your password is not right.');
+      send();ceStep2(nu);ceMsg('Check your new inbox for the code. (Prototype: see the Prototype panel inbox.)','');return}
+    if($('#ce-code').value.trim()!==code)return ceMsg('That code is not right.');
+    people().forEach(p=>p.email=nu);sendEmail(cur,'Your Foresee email address was changed',`<p>The sign-in email for your Foresee Training account was changed to <b>${esc(nu)}</b>.</p><p>If you didn’t make this change, contact support@foreseetraining.com straight away.</p>`);
+    if(S.session.role==='school')audit('Changed sign-in email to '+nu);save();closeModal();toast('Email changed. Sign in with '+esc(nu)+' from now on.');render()};
+}
 function forgot(){if(LIVE)return liveForgot();
   const m=modal('Reset your password',`<form id="fp" class="stack"><p class="muted small">Enter your email. If it matches an account, we’ll send a six-digit reset code.</p><div class="field"><label for="fp-email">Email address</label><input type="email" id="fp-email"></div><div id="fp-step2" hidden class="stack"><div class="field"><label for="fp-code">Six-digit code</label><input type="text" id="fp-code" inputmode="numeric" maxlength="6" class="mono"></div><div class="field"><label for="fp-pw">New password</label><input type="password" id="fp-pw" autocomplete="new-password"><span class="hint">At least 10 characters, with a number</span></div></div><div id="fp-msg"></div><button class="btn btn-primary" type="submit" id="fp-btn">Send reset code</button></form>`);
   let code=null,who=null;
@@ -2800,15 +2822,16 @@ async function zipCerts(list){
 /* ---------- Account ---------- */
 VIEWS.account=()=>{if(!guard('school'))return false;const s=S.school,c=s.contacts[0];return schoolHead('School account')+`
 <section class="wrap section-tight stack" style="gap:24px;padding-top:16px"><div class="split">
- <form class="card stack" id="acc" novalidate><h3>School details</h3><div class="form-grid">${fld('ac-school','School name','text',s.name,'organization','','full')}${fld('ac-addr','Address','text',s.address,'street-address','','full')}${fld('ac-pc','Postcode','text',s.postcode,'postal-code')}${fld('ac-tel','Telephone','tel',s.phone,'tel')}</div><h3>Main contact</h3><div class="form-grid">${fld('ac-name','Full name','text',c.name,'name')}${fld('ac-role','Role','text',c.role,'organization-title')}${fld('ac-email','Email','email',c.email,'email','','full')}</div><div id="ac-msg"></div><div class="row"><button class="btn btn-primary" type="submit">Save details</button><button class="btn btn-ghost" type="button" id="ac-pw">Change password</button></div></form>
+ <form class="card stack" id="acc" novalidate><h3>School details</h3><div class="form-grid">${fld('ac-school','School name','text',s.name,'organization','','full')}${fld('ac-addr','Address','text',s.address,'street-address','','full')}${fld('ac-pc','Postcode','text',s.postcode,'postal-code')}${fld('ac-tel','Telephone','tel',s.phone,'tel')}</div><h3>Main contact</h3><div class="form-grid">${fld('ac-name','Full name','text',c.name,'name')}${fld('ac-role','Role','text',c.role,'organization-title')}<div class="field full"><label for="ac-email">Email (you sign in with this)</label><div class="row" style="flex-wrap:nowrap;gap:8px"><input type="email" id="ac-email" value="${esc(myEmail()||c.email)}" readonly style="opacity:.8"><button class="btn btn-ghost" type="button" id="ac-em" style="white-space:nowrap">Change email</button></div></div></div><div id="ac-msg"></div><div class="row"><button class="btn btn-primary" type="submit">Save details</button><button class="btn btn-ghost" type="button" id="ac-pw">Change password</button></div></form>
  <div class="stack">
   <div class="card stack" style="gap:10px"><h3>Authorised contacts</h3>${s.contacts.map(x=>`<div class="row between" style="flex-wrap:nowrap"><div><b class="small">${esc(x.name)}</b><div class="small muted">${esc(x.email)}</div></div><span class="pill ${x.primary?'teal':''}">${x.primary?'Primary':'Administrator'}</span></div>`).join('')}<button class="btn btn-ghost btn-sm" id="ac-add" style="align-self:flex-start">Invite another administrator</button></div>
   <div class="card stack" style="gap:10px"><h3>Orders and invoices</h3>${S.orders.length?S.orders.map(o=>`<div class="row between" style="flex-wrap:nowrap"><div><b class="mono small">${o.ref}</b><div class="small muted">${esc(orderTitle(o))} · ${fmtD(o.at)} · ${o.sub?'Yearly plan':o.licence?'School licence':o.places+' places'} · ${money(o.total)}</div></div><button class="btn btn-ghost btn-sm" data-inv="${o.ref}">${o.status==='Paid'?'Invoice':esc(o.status)}</button></div>`).join(''):'<p class="small muted">No orders yet.</p>'}</div>
  </div></div></section>`};
 AFTER.account=()=>{
   $$('[data-inv]').forEach(b=>b.onclick=()=>invoiceModal(S.orders.find(o=>o.ref===b.dataset.inv)));
-  $('#acc').onsubmit=e=>{e.preventDefault();const v=id=>$('#'+id).value.trim();if(!emailOk(v('ac-email'))){$('#ac-msg').innerHTML='<div class="notice bad small">Enter a valid email.</div>';return}if(LIVE)return liveCall('account',{action:'update_school',school:{name:v('ac-school'),address:v('ac-addr'),postcode:v('ac-pc'),phone:v('ac-tel')},contact:{name:v('ac-name'),role:v('ac-role')}},'Details saved.');Object.assign(S.school,{name:v('ac-school'),address:v('ac-addr'),postcode:v('ac-pc'),phone:v('ac-tel')});Object.assign(S.school.contacts[0],{name:v('ac-name'),role:v('ac-role'),email:v('ac-email')});audit('School details updated');save();toast('Details saved.');render()};
+  $('#acc').onsubmit=e=>{e.preventDefault();const v=id=>$('#'+id).value.trim();if(!emailOk(v('ac-email'))){$('#ac-msg').innerHTML='<div class="notice bad small">Enter a valid email.</div>';return}if(LIVE)return liveCall('account',{action:'update_school',school:{name:v('ac-school'),address:v('ac-addr'),postcode:v('ac-pc'),phone:v('ac-tel')},contact:{name:v('ac-name'),role:v('ac-role')}},'Details saved.');Object.assign(S.school,{name:v('ac-school'),address:v('ac-addr'),postcode:v('ac-pc'),phone:v('ac-tel')});Object.assign(S.school.contacts[0],{name:v('ac-name'),role:v('ac-role')});audit('School details updated');save();toast('Details saved.');render()};
   $('#ac-pw').onclick=()=>forgot();
+  $('#ac-em').onclick=()=>changeEmail();
   $('#ac-add').onclick=()=>{const m=modal('Invite an administrator',`<form id="adm" class="stack"><div class="field"><label for="ad-name">Full name</label><input type="text" id="ad-name"></div><div class="field"><label for="ad-email">Work email</label><input type="email" id="ad-email"></div><div id="ad-msg"></div><button class="btn btn-primary" type="submit">Send invitation</button></form>`);$('#adm',m).onsubmit=e=>{e.preventDefault();const n=$('#ad-name').value.trim(),em=$('#ad-email').value.trim();if(!n||!emailOk(em)){$('#ad-msg').innerHTML='<div class="notice bad small">Enter a name and valid email.</div>';return}if(LIVE)return liveCall('account',{action:'invite_admin',name:n,email:em},'Invitation sent to '+esc(em)+'.');S.school.contacts.push({name:n,role:'Administrator',email:em,password:'',primary:false});sendEmail(em,'You’ve been added as a school administrator',`<p>${esc(S.school.contacts[0].name)} has added you as an administrator for ${esc(S.school.name)} on Foresee Training.</p>`);audit('Invited administrator '+n);save();closeModal();render()}};
 };
 
@@ -2834,12 +2857,13 @@ VIEWS.learner=()=>{if(!guard('learner'))return false;const a=learner();if(!a){S.
  <div class="stack" style="gap:16px">
   <div class="card stack" style="gap:10px"><h4>Learning objectives</h4><ul class="small" style="margin:0;padding-left:18px">${S.course.objectives.map(o=>`<li>${esc(o)}</li>`).join('')}</ul></div>
   <div class="card"><dl class="kv">${lic?`<dt>Quiz</dt><dd>${a.quiz?a.quiz.score+' of '+a.quiz.total:'Optional'}</dd><dt>Certificate</dt><dd>${a.cert?'Available':'When all lessons are done'}</dd>`:`<dt>Assessment</dt><dd>${passed(a)?'Passed':a.attempts.length?'Not yet passed':allDone?'Available':'Locked'}</dd><dt>Certificate</dt><dd>${a.cert?'Available':'Not yet available'}</dd><dt>Pass mark</dt><dd>${S.cfg.passMark}%</dd>`}</dl></div>
+  <div class="card stack" style="gap:10px"><h4>Your account</h4><div class="small"><span class="muted">You sign in with</span><br><b style="word-break:break-all">${esc(myEmail()||a.email)}</b></div><div class="row" style="gap:8px"><button class="btn btn-ghost btn-sm" id="ld-email">Change email</button><button class="btn btn-ghost btn-sm" id="ld-pw">Change password</button></div></div>
   <div class="notice small"><span>Watch at least ${S.cfg.completionPct}% of each video and open its key notes to complete a lesson. Every lesson also has a text version.</span></div>
  </div>
 </div></section>`};
 AFTER.learner=()=>{
   const cf=$('#conf-form');if(cf){cf.onsubmit=e=>{e.preventDefault();const a=learner(),which=cf.dataset.which,n=S.course.confidence.length,vals=[];for(let i=0;i<n;i++){const r=$(`input[name=conf${i}]:checked`,cf);if(!r){$('#conf-msg').innerHTML='<div class="notice bad small"><span>Choose an answer for each line, or skip.</span></div>';return}vals.push(+r.value)}a.conf=a.conf||{};a.conf[which]=vals;save();if(LIVE)liveCall('learn',{action:'conf',attendee:a.id,which,vals},null,true);toast(which==='before'?'Thanks. You’re ready to start.':'Thanks for your feedback.');render()};$('#conf-skip').onclick=()=>{const a=learner();a.conf=a.conf||{};a.conf[cf.dataset.which]='skipped';save();if(LIVE)liveCall('learn',{action:'conf',attendee:a.id,which:cf.dataset.which,vals:'skipped'},null,true);render()}}
-  $$('[data-lesson]').forEach(b=>{if(!$('#conf-form')||$('#conf-form').dataset.which!=='before')return;b.addEventListener('click',e=>{e.stopImmediatePropagation();$('#conf-form').scrollIntoView({behavior:'smooth',block:'center'});toast('Please answer the three quick questions first, or skip them.')},true)});[$('#ld-quiz'),$('#ld-quiz2')].forEach(b=>{if(b)b.onclick=startQuiz});$$('[data-switch]').forEach(b=>b.onclick=()=>{S.session.user=b.dataset.switch;save();render()});$$('[data-lesson]').forEach(b=>b.onclick=()=>go('lesson',{i:+b.dataset.lesson}));const s=$('#ld-assess')||$('#ld-assess2');if(s)s.onclick=()=>startAssessment();const s2=$('#ld-assess2');if(s2)s2.onclick=()=>startAssessment();$$('[data-cert]').forEach(b=>b.onclick=()=>go('certificate'))};
+  $$('[data-lesson]').forEach(b=>{if(!$('#conf-form')||$('#conf-form').dataset.which!=='before')return;b.addEventListener('click',e=>{e.stopImmediatePropagation();$('#conf-form').scrollIntoView({behavior:'smooth',block:'center'});toast('Please answer the three quick questions first, or skip them.')},true)});[$('#ld-quiz'),$('#ld-quiz2')].forEach(b=>{if(b)b.onclick=startQuiz});$$('[data-switch]').forEach(b=>b.onclick=()=>{S.session.user=b.dataset.switch;save();render()});$$('[data-lesson]').forEach(b=>b.onclick=()=>go('lesson',{i:+b.dataset.lesson}));const s=$('#ld-assess')||$('#ld-assess2');if(s)s.onclick=()=>startAssessment();const s2=$('#ld-assess2');if(s2)s2.onclick=()=>startAssessment();$$('[data-cert]').forEach(b=>b.onclick=()=>go('certificate'));const le=$('#ld-email');if(le)le.onclick=()=>changeEmail();const lp=$('#ld-pw');if(lp)lp.onclick=()=>forgot()};
 
 VIEWS.lesson=()=>{if(!guard('learner'))return false;const a=learner(),ls=allLessons(),i=PARAMS.i||0,{m,l}=ls[i];if(!canStart(a,i)){toast('Complete the previous module first.');return VIEWS.learner()}
   return `<section class="wrap app-head stack" style="gap:8px;padding-bottom:14px"><div class="crumbs"><button data-go="learner">My training</button><span>/</span><span>Module ${i+1}</span></div><h1 style="font-size:clamp(1.4rem,2.8vw,2rem)">${esc(m.title)}</h1><p class="muted small">${esc(l.title)} · <span class="mono">${fmtT(l.dur)}</span> · ${l.notes.length} interactive notes</p></section>
@@ -3191,7 +3215,7 @@ function updateTour(){if(LIVE)return;
 /* ---------- Live mode: the real server (Supabase). Only used when config.js has the project details. ---------- */
 function liveReset(){
   S.school={id:null,name:'',address:'',postcode:'',phone:'',contacts:[],joinCode:'',verified:true};
-  S.attendees=[];S.orders=[];S.subscription=null;S.audit=[];S.inbox=[];S.leads=[];S.session={role:'public',user:null};
+  S.attendees=[];S.orders=[];S.subscription=null;S.audit=[];S.inbox=[];S.leads=[];S.me='';S.session={role:'public',user:null};
   try{S.pending=JSON.parse(sessionStorage.getItem('ft_pending')||'null')}catch(e){S.pending=null}
 }
 // Put what the server sent into the page's data, keeping the person on the course they were looking at
@@ -3204,7 +3228,7 @@ function applySnap(r){
   }else{const was=S.session.role;liveReset();if(r.role==='admin'&&was!=='admin')toast('Signed in. Platform administration is done in Supabase for now.')}
 }
 const liveErr=e=>toast(esc((e&&e.message)||'Something went wrong. Please try again.'));
-async function liveRefresh(){applySnap(await FT.call('account',{action:'bootstrap'}))}
+async function liveRefresh(){applySnap(await FT.call('account',{action:'bootstrap'}));try{const u=(await FT.sb.auth.getSession()).data.session;S.me=u&&u.user?(u.user.email||'').toLowerCase():''}catch(e){}}
 function liveHome(){go(S.session.role==='school'?'school':S.session.role==='learner'?'learner':'home')}
 function busyBtn(sel,on,label){const b=typeof sel==='string'?$(sel):sel;if(!b)return;if(on){b.dataset.label=b.textContent;b.disabled=true;b.textContent=label||'Please wait…'}else{b.disabled=false;if(b.dataset.label)b.textContent=b.dataset.label}}
 
@@ -3309,6 +3333,28 @@ async function liveCheckout(o){
 async function liveAuto(on){try{const r=await FT.call('billing',{action:'auto_renew',on});applySnap({role:'school',...r.snapshot});toast(on?'Automatic renewal is on.':'Automatic renewal is off. Your plan stays active until its end date.');render()}catch(e){liveErr(e)}}
 function liveUpgrade(){const x=S.subscription;confirmBox('Upgrade to Complete?',`You’ll pay the difference for the rest of this year now (Stripe works it out to the day). From ${fmtD(x.end)} the yearly price is ${money(planPrice('complete',x.band))}.`,'Upgrade',async()=>{try{const r=await FT.call('billing',{action:'upgrade'});applySnap({role:'school',...r.snapshot});toast('Your plan is now Complete.');go('plan')}catch(e){liveErr(e)}})}
 async function livePortal(){toast('Opening your billing page…');try{const r=await FT.call('billing',{action:'portal'});location.href=r.url}catch(e){liveErr(e)}}
+function liveChangeEmail(){
+  const m=changeEmailModal();const cur=myEmail();let nu='',step=1;
+  const ask=async()=>{const r=await FT.sb.auth.updateUser({email:nu});if(r.error)throw r.error};
+  const nice=e=>{const t=(e&&e.message)||'';return /registered|exists|already/i.test(t)?'That email already has a Foresee account.':/rate|seconds|too many/i.test(t)?'Please wait a minute before asking for another code.':'We couldn’t send the code. Please try again.'};
+  $('#ce-again',m).onclick=async()=>{try{await ask();ceMsg('A new code is on its way. Check your spam folder too.','')}catch(e){ceMsg(nice(e))}};
+  $('#ce',m).onsubmit=async e=>{e.preventDefault();
+    if(step===1){nu=$('#ce-new').value.trim().toLowerCase();if(!emailOk(nu))return ceMsg('Enter a valid email address.');if(nu===cur.toLowerCase())return ceMsg('That’s the email you already use.');
+      busyBtn('#ce-btn',true,'Sending…');
+      try{const r=await FT.sb.auth.signInWithPassword({email:cur,password:$('#ce-pw').value});if(r.error){busyBtn('#ce-btn',false);return ceMsg('Your password is not right.')}}catch(x){busyBtn('#ce-btn',false);return ceMsg('We couldn’t reach the server. Check your connection and try again.')}
+      try{await ask()}catch(x){busyBtn('#ce-btn',false);return ceMsg(nice(x))}
+      busyBtn('#ce-btn',false);step=2;ceStep2(nu);ceMsg('Check your new inbox for the six-digit code. Check your spam folder too.','');return}
+    const code=$('#ce-code').value.trim();if(!/^\d{6}$/.test(code))return ceMsg('Enter the six-digit code from the email.');
+    busyBtn('#ce-btn',true,'Checking…');
+    let r;try{r=await FT.sb.auth.verifyOtp({email:step===2?nu:cur,token:code,type:'email_change'})}catch(x){r={error:x}}
+    if(r.error){busyBtn('#ce-btn',false);return ceMsg('That code is not right or has expired. Send a new code and try again.')}
+    // If Supabase's "Secure email change" is on, a second code also goes to the current address
+    const now=((r.data&&r.data.user&&r.data.user.email)||'').toLowerCase();
+    if(now!==nu&&step===2){busyBtn('#ce-btn',false);step=3;ceStep2(cur);$('#ce-again').hidden=true;ceMsg('Nearly done. For your security we also sent a code to your current address, <b>'+esc(cur)+'</b>. Enter that code too.','');return}
+    try{await FT.call('account',{action:'email_changed'})}catch(x){}
+    try{await liveRefresh()}catch(x){}
+    closeModal();toast('Email changed. Sign in with '+esc(nu)+' from now on.');render()};
+}
 function liveAsk(what){toast(`To ${what}, email ${esc((window.FT_CONFIG||{}).supportEmail||'support@foreseetraining.com')} and we’ll do it for you.`)}
 
 // School administration
