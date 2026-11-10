@@ -555,6 +555,12 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 .ctl:hover{background:rgba(255,255,255,.08)}
 .ctl[aria-pressed="true"]{color:var(--teal-bright)}
 .ctl svg{width:20px;height:20px}
+.pp-grp{display:flex;align-items:center;gap:2px}
+.ctl.skip svg{width:17px;height:17px;opacity:.85;transition:transform .15s,opacity .15s}
+.ctl.skip:hover svg{opacity:1}
+.ctl.rw:hover svg{transform:translateX(-2px)}
+.ctl.fw:hover svg{transform:translateX(2px)}
+.ctl.pp svg{width:22px;height:22px}
 .tg{display:inline-flex;align-items:center;gap:6px;min-width:0;padding:5px 11px 5px 8px;border-radius:999px;border:1px solid transparent;transition:background .25s,border-color .25s,color .25s}
 .tg .tg-ic{width:20px;height:20px;flex:none;overflow:visible}
 .tg .tg-l{font-size:.72rem;font-weight:800;letter-spacing:.01em;white-space:nowrap}
@@ -1909,7 +1915,7 @@ function mountPlayer(host,lesson,opts){
     </div>
     <div class="cc-bar"><span class="cc-wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span><div class="cc" aria-hidden="true"></div></div>
     <div class="controls">
-     <button class="ctl pp" aria-label="Play">${I.play}</button>
+     <span class="pp-grp"><button class="ctl skip rw" aria-label="Back 10 seconds" title="Back 10 seconds"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" stroke="none" d="M11.5 6.2v11.6c0 .8-.9 1.3-1.6.8L2.6 13c-.6-.4-.6-1.4 0-1.8l7.3-5.6c.7-.5 1.6 0 1.6.8Zm10 0v11.6c0 .8-.9 1.3-1.6.8L12.6 13c-.6-.4-.6-1.4 0-1.8l7.3-5.6c.7-.5 1.6 0 1.6.8Z"/></svg></button><button class="ctl pp" aria-label="Play">${I.play}</button><button class="ctl skip fw" aria-label="Forward 10 seconds" title="Forward 10 seconds"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" stroke="none" d="M12.5 6.2v11.6c0 .8.9 1.3 1.6.8l7.3-5.6c.6-.4.6-1.4 0-1.8l-7.3-5.6c-.7-.5-1.6 0-1.6.8Zm-10 0v11.6c0 .8.9 1.3 1.6.8l7.3-5.6c.6-.4.6-1.4 0-1.8L4.1 5.4c-.7-.5-1.6 0-1.6.8Z"/></svg></button></span>
      <span class="time"><span class="cur">00:00</span> / ${fmtT(lesson.dur)}</span>
      <div class="track" role="slider" tabindex="0" aria-label="Video progress" aria-valuemin="0" aria-valuemax="${lesson.dur}" aria-valuenow="0">
        <div class="rail"></div><div class="watched"></div><div class="played"></div>
@@ -2021,6 +2027,9 @@ function mountPlayer(host,lesson,opts){
   function state(){const ws=Array.from({length:lesson.dur+1},(_,i)=>w[i]==='1'?'1':'0').join('');return {w:ws,pos:Math.floor(t),notes:[...opened],asks:[...askDone],pct:watchedPct(ws,lesson.dur)}}
   function persist(){opts.onSave&&opts.onSave(state())}
   big.onclick=play;pp.onclick=()=>playing?pause():play();
+  /* Back and forward 10 seconds. Forward still stops at the furthest point watched, and never skips a note that hasn't been read. */
+  $('.rw',P).onclick=()=>{if(stage.querySelector('.ask'))return;seek(t-10)};
+  $('.fw',P).onclick=()=>{if(stage.querySelector('.ask'))return;const pn=pendingNote(t,Math.min(lesson.dur,t+10));seek(pn?Math.min(t+10,noteStopAt(pn)-0.1):t+10)};
   stage.addEventListener('keydown',e=>{if(e.key===' '||e.key==='k'){e.preventDefault();playing?pause():play()}if(e.key==='ArrowRight')seek(t+5);if(e.key==='ArrowLeft')seek(t-5);if(e.key==='m'||e.key==='M')$('.nar',P).click()});
   stage.addEventListener('click',e=>{const m=e.target.closest('[data-more]');if(m){if(playing)pause();const o=m.classList.toggle('open');m.setAttribute('aria-expanded',o);return}if(e.target===stage||e.target.closest('.scene'))playing?pause():play()});
   stage.addEventListener('keydown',e=>{const m=e.target.closest&&e.target.closest('[data-more]');if(m&&(e.key==='Enter'||e.key===' ')){e.preventDefault();e.stopPropagation();if(playing)pause();const o=m.classList.toggle('open');m.setAttribute('aria-expanded',o)}},true);
