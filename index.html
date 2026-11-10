@@ -494,13 +494,48 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 .ask-fb p{margin:12px 0 10px;font-size:14px;line-height:1.45}
 .ask-go,.ask-re{font:inherit;font-weight:700;font-size:14px;padding:9px 16px;border-radius:999px;border:0;cursor:pointer;background:var(--btn);color:#fff}
 .ask-re{background:var(--soft);color:var(--soft-ink)}
-.nstop{background:rgba(4,12,26,.6)}
-.nstop-card{text-align:left;border-top:5px solid var(--teal-bright)}
-.nstop-card .ask-k .ic{width:16px;height:16px}
-.nstop-lead{margin:0 0 6px;color:var(--muted);font-size:14px}
-.nstop-card h4{font-size:clamp(17px,2.3cqw,24px);margin:0 0 14px;line-height:1.25}
+.nstop{background:radial-gradient(120% 120% at 50% 0%,rgba(10,26,51,.5),rgba(4,12,26,.84));backdrop-filter:blur(5px)}
+.nstop-card{position:relative;width:min(92%,600px);max-height:100%;overflow:auto;background:#fff;color:#1D2532;border-radius:16px;padding:clamp(16px,2.6cqw,28px);box-shadow:0 24px 60px rgba(0,0,0,.4);text-align:left;animation:nsIn .45s cubic-bezier(.2,.9,.3,1.2) both}
+.nstop-card::before{content:"";position:absolute;left:0;top:0;right:0;height:5px;background:linear-gradient(90deg,#0A7E7B,#2BC4BC,#7BE3C9,#0A7E7B);background-size:200% 100%;animation:nsBar 3s linear infinite}
+@keyframes nsIn{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes nsBar{to{background-position:200% 0}}
+.nstop-top{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.nstop-k{font-family:var(--f-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#0A7E7B;display:flex;align-items:center;gap:8px}
+.nstop-dot{width:8px;height:8px;border-radius:50%;background:#2BC4BC;animation:nsDot 1.6s infinite}
+@keyframes nsDot{0%{box-shadow:0 0 0 0 rgba(43,196,188,.6)}70%{box-shadow:0 0 0 8px rgba(43,196,188,0)}100%{box-shadow:0 0 0 0 rgba(43,196,188,0)}}
+.nstop-book{position:relative;width:30px;height:24px;flex:none;perspective:80px}
+.nstop-book i{position:absolute;top:2px;width:14px;height:20px;background:#E6F4F3;border:2px solid #0A7E7B}
+.nstop-book i:first-child{left:1px;border-radius:4px 1px 1px 4px}
+.nstop-book i:last-child{left:14px;border-radius:1px 4px 4px 1px;transform-origin:left center;animation:nsPage 2.6s ease-in-out infinite}
+@keyframes nsPage{0%,35%{transform:rotateY(0)}55%,100%{transform:rotateY(-170deg)}}
+.nstop-wave{margin-left:auto;display:flex;gap:3px;align-items:flex-end;height:18px;opacity:0;transition:opacity .25s}
+.nstop.talking .nstop-wave{opacity:1}
+.nstop-wave i{width:3px;height:5px;border-radius:2px;background:#13958F;animation:ccWave .9s ease-in-out infinite}
+.nstop-wave i:nth-child(2){animation-delay:.15s}.nstop-wave i:nth-child(3){animation-delay:.3s}.nstop-wave i:nth-child(4){animation-delay:.45s}
+.nstop-lead{margin:0 0 4px;color:#586577;font-size:clamp(13px,1.5cqw,15px)}
+.nstop-card h4{font-size:clamp(19px,2.7cqw,27px);line-height:1.2;margin:0 0 16px;background:linear-gradient(90deg,#0D2142 30%,#0A7E7B);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#0D2142}
+.nstop-steps{list-style:none;display:flex;flex-wrap:wrap;gap:6px;margin:0 0 18px;padding:0;font-size:12px;color:#586577}
+.nstop-steps li{display:flex;align-items:center;gap:6px;padding:4px 11px 4px 4px;border-radius:999px;background:#F2F5F9;transition:background .3s,color .3s}
+.nstop-steps b{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#DFE5EC;color:#586577;font-size:11px;transition:background .3s}
+.nstop-steps li.on{background:#E6F4F3;color:#075E5C;font-weight:700}
+.nstop-steps li.on b{background:#0A7E7B;color:#fff}
+.nstop-steps li.done{background:#E3F4EB;color:#14724A}
+.nstop-steps li.done b{background:#14724A;color:#fff}
 .nstop-row{display:flex;gap:10px;flex-wrap:wrap}
-.nstop-hint{margin:10px 0 0;font-size:13px;color:var(--muted)}
+.nstop-btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:10px;font:inherit;font-weight:700;font-size:15px;padding:12px 22px;border-radius:999px;border:0;cursor:pointer;color:#fff;background:linear-gradient(135deg,#0A7E7B,#13958F 55%,#2BC4BC);box-shadow:0 8px 20px rgba(10,126,123,.35);transition:transform .15s,box-shadow .15s;animation:nsIn .35s both}
+.nstop-btn:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(10,126,123,.45)}
+.nstop-btn:focus-visible{outline:3px solid #2BC4BC;outline-offset:3px}
+.nstop-btn::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.4) 50%,transparent 70%);transform:translateX(-120%);animation:nsShine 2.8s ease-in-out infinite}
+@keyframes nsShine{55%,100%{transform:translateX(120%)}}
+.nstop-arr{font-style:normal;animation:nsNudge 1.2s ease-in-out infinite}
+@keyframes nsNudge{50%{transform:translateX(5px)}}
+.nstop-res{background:linear-gradient(135deg,#0D2142,#1C4A7E);animation:nsIn .35s both,nsRing 1.8s .4s infinite}
+@keyframes nsRing{0%{box-shadow:0 0 0 0 rgba(43,196,188,.55)}70%{box-shadow:0 0 0 12px rgba(43,196,188,0)}100%{box-shadow:0 0 0 0 rgba(43,196,188,0)}}
+.nstop-play{font-style:normal;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#2BC4BC;color:#0D2142;font-size:10px;padding-left:2px}
+.nstop-hint{margin:12px 0 0;font-size:13px;color:#586577;animation:nsIn .4s both}
+.nbtn.cue{border-color:var(--teal-bright);background:rgba(43,196,188,.16);animation:nsCue 1.4s ease-in-out infinite}
+@keyframes nsCue{50%{box-shadow:0 0 0 3px rgba(43,196,188,.3),0 0 24px rgba(43,196,188,.4);transform:translateX(-3px)}}
+@media (prefers-reduced-motion:reduce){.nstop-card,.nstop-card::before,.nstop-dot,.nstop-book i,.nstop-btn,.nstop-btn::after,.nstop-arr,.nstop-res,.nstop-wave i,.nbtn.cue{animation:none!important}}
 .stage:has(.ask) .big-play{display:none}
 .mk-ask{position:absolute;top:50%;width:9px;height:9px;margin-left:-4.5px;transform:translateY(-50%) rotate(45deg);background:#F5B342;border:1.5px solid #0A1A33;border-radius:2px;pointer-events:none;z-index:2}
 @media (prefers-reduced-motion:reduce){.scene .s-art::before,.scene .s-art .ic,.scene .sa-cycle .sa-orbit,.scene .sa-core,.scene .sa-tap{animation:none}.scene .sa li,.scene .sa *{transition:none!important}.scene .sa-ring::before{animation:none}}
@@ -1833,15 +1868,36 @@ function mountPlayer(host,lesson,opts){
     setTimeout(()=>{const f=$('.ask-o',box);if(f)f.focus()},60)}
   /* Pause and read: the first time the video reaches a note, it stops and asks the learner to open it.
      Resume appears once the note has been opened. Notes already opened don't stop the video again. */
-  const pendingNote=(from,to)=>opts.noteStops?lesson.notes.find(n=>!opened.has(n.id)&&from<n.t-0.06&&to>=n.t-0.06):null;
-  function showNoteStop(n){closePop();$$('.ask',stage).forEach(x=>x.remove());const box=document.createElement('div');box.className='ask nstop';box.dataset.n=n.id;box.setAttribute('role','dialog');box.setAttribute('aria-label','Pause and read a note');
-    box.innerHTML=`<div class="ask-card nstop-card"><p class="ask-k">${ic('doc')}<span>Pause and read</span></p><p class="nstop-lead">Now pause the video and read the interactive note:</p><h4>${esc(n.title.replace(/^Explore:\s*/,''))}</h4><div class="nstop-row"><button class="ask-go nstop-open">Open the note</button><button class="ask-go nstop-res" hidden>Resume the video ▶</button></div><p class="nstop-hint" hidden>Take your time. When you’ve read it, resume the video.</p></div>`;
+  /* Pause and read. The video carries on to the end of the sentence being spoken, then stops. The narrator says
+     "Now pause the video and read the interactive note: …" while the note glows in the list. The learner opens it,
+     reads it, then resumes. Notes already opened don't stop the video again. */
+  const noteStopAt=n=>{const c=lesson.captions.find(c=>c[0]>=n.t-0.05);return c?c[0]:lesson.dur};
+  const pendingNote=(from,to)=>opts.noteStops?lesson.notes.find(n=>{const at=noteStopAt(n);return !opened.has(n.id)&&from<at-0.06&&to>=at-0.06}):null;
+  let cue=null;
+  function stopCue(){if(cue){try{cue.pause()}catch(e){}cue=null}}
+  function showNoteStop(n){closePop();$$('.ask',stage).forEach(x=>x.remove());
+    nview.hidden=true;nlist.hidden=false;noteList();
+    const item=$(`.nbtn[data-n="${n.id}"]`,nlist);if(item){item.classList.add('cue');try{item.scrollIntoView({block:'nearest',behavior:'smooth'})}catch(e){}}
+    const side=!opts.compact&&!isMobile();
+    const box=document.createElement('div');box.className='ask nstop';box.dataset.n=n.id;box.setAttribute('role','dialog');box.setAttribute('aria-label','Pause and read a note');
+    box.innerHTML=`<div class="nstop-card">
+      <div class="nstop-top"><span class="nstop-book" aria-hidden="true"><i></i><i></i></span><span class="nstop-k"><span class="nstop-dot"></span>Pause and read</span><span class="nstop-wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span></div>
+      <p class="nstop-lead">Now pause the video and read the interactive note:</p>
+      <h4>${esc(n.title.replace(/^Explore:\s*/,''))}</h4>
+      <ol class="nstop-steps" aria-hidden="true"><li class="on"><b>1</b>Open the note</li><li><b>2</b>Read it</li><li><b>3</b>Resume</li></ol>
+      <div class="nstop-row"><button class="nstop-btn nstop-open"><span>Open the note</span><i class="nstop-arr" aria-hidden="true">${side?'→':'↓'}</i></button><button class="nstop-btn nstop-res" hidden><i class="nstop-play" aria-hidden="true">▶</i><span>Resume the video</span></button></div>
+      <p class="nstop-hint" hidden>${side?'The note is open on the right. ':''}Take your time, then resume when you’ve read it.</p></div>`;
     stage.appendChild(box);box.addEventListener('click',e=>e.stopPropagation());box.addEventListener('keydown',e=>e.stopPropagation());
-    $('.nstop-open',box).onclick=()=>{openNote(n.id,true);if(!opts.compact&&!isMobile()){const nv=P.querySelector('.pl-notes');if(nv&&nv.scrollIntoView&&window.innerWidth<1100)nv.scrollIntoView({behavior:'smooth',block:'nearest'})}};
+    $('.nstop-open',box).onclick=()=>{openNote(n.id,true);if(side&&window.innerWidth<1100){const nv=P.querySelector('.pl-notes');if(nv&&nv.scrollIntoView)nv.scrollIntoView({behavior:'smooth',block:'nearest'})}};
     $('.nstop-res',box).onclick=resumeFromStop;
+    // The narrator's line, in the lesson's own voice (skipped if the voice is switched off or the course has no recording yet)
+    if(narr){try{stopCue();const au=new Audio(AUDIO_DIR+n.id+'_p.mp4');au.volume=vol;au.onplaying=()=>box.classList.add('talking');au.onended=au.onpause=au.onerror=()=>box.classList.remove('talking');const pr=au.play();if(pr&&pr.catch)pr.catch(()=>{});cue=au}catch(e){}}
     setTimeout(()=>{const f=$('.nstop-open',box);if(f)f.focus()},60)}
-  function noteStopReady(id){const box=stage.querySelector('.nstop');if(!box||box.dataset.n!==id)return;$('.nstop-open',box).hidden=true;$('.nstop-res',box).hidden=false;$('.nstop-hint',box).hidden=false;$('.nstop-res',box).focus()}
-  function resumeFromStop(){const box=stage.querySelector('.nstop');if(box)box.remove();closePop();play()}
+  function noteStopReady(id){const box=stage.querySelector('.nstop');if(!box||box.dataset.n!==id)return;
+    const st=$$('.nstop-steps li',box);st[0].className='done';st[0].querySelector('b').textContent='✓';st[1].className='on';st[2].className='on';
+    box.classList.add('ready');$('.nstop-open',box).hidden=true;const r=$('.nstop-res',box);r.hidden=false;$('.nstop-hint',box).hidden=false;r.focus();
+    $$('.nbtn.cue',nlist).forEach(x=>x.classList.remove('cue'))}
+  function resumeFromStop(){stopCue();const box=stage.querySelector('.nstop');if(box)box.remove();$$('.nbtn.cue',nlist).forEach(x=>x.classList.remove('cue'));closePop();play()}
   const maxReached=()=>{let m=0;for(let i=0;i<w.length;i++)if(w[i]==='1')m=i;return m};
   const isMobile=()=>window.matchMedia('(max-width:760px)').matches;
   host.innerHTML=`<div class="player ${opts.compact?'compact':''}">
@@ -1893,7 +1949,7 @@ function mountPlayer(host,lesson,opts){
   function noteList(){
     count.textContent=`${[...opened].filter(id=>lesson.notes.some(n=>n.id===id)).length} of ${lesson.notes.length} opened`;
     nlist.innerHTML=lesson.notes.map(n=>{const live=t>=n.t&&t<n.t+10;return `<li><button class="nbtn ${live?'live':''}" data-n="${n.id}" aria-expanded="false"><span class="ts">${fmtT(n.t)}</span><span>${esc(n.title)}${n.essential?'<br><span class="ess">Key note</span>':''}</span>${opened.has(n.id)?'<span class="seen">✓ Read</span>':''}</button></li>`}).join('');
-    $$('.nbtn',nlist).forEach(b=>b.onclick=()=>openNote(b.dataset.n,true));
+    $$('.nbtn',nlist).forEach(b=>b.onclick=()=>openNote(b.dataset.n,true));{const ns=stage.querySelector('.nstop:not(.ready)');if(ns){const c=$(`.nbtn[data-n="${ns.dataset.n}"]`,nlist);if(c)c.classList.add('cue')}}
     $$('.mk',track).forEach(m=>m.classList.toggle('seen',opened.has(m.dataset.n)));
   }
   function markOpened(n){if(!opened.has(n.id)){opened.add(n.id);opts.onNote&&opts.onNote(n,[...opened]);persist()}noteStopReady(n.id)}
@@ -1950,13 +2006,13 @@ function mountPlayer(host,lesson,opts){
   function loop(){
     if(!playing)return;
     const ts=performance.now();const dt=last?(ts-last)/1000:0;last=ts;
-    if(dt<2){const from=t;let nt=t+dt*speed;if(segs&&clip&&segIdx>=0&&!clip.paused&&!clip.ended){const at=segs[segIdx].t+clip.currentTime;if(Math.abs(at-nt)<1.5)nt=Math.max(from,at)}const ai=pendingAsk(from,Math.min(lesson.dur,nt));if(ai>=0){t=askAt(ai)-0.07;for(let s=Math.floor(from);s<=Math.floor(t);s++)w[s]='1';update();pause();persist();showAsk(ai);return}const pn=pendingNote(from,Math.min(lesson.dur,nt));if(pn){t=Math.max(from,pn.t-0.05);for(let s=Math.floor(from);s<=Math.floor(t);s++)w[s]='1';update();pause();persist();showNoteStop(pn);return}t=Math.min(lesson.dur,nt);for(let s=Math.floor(from);s<=Math.floor(t);s++)w[s]='1'}
+    if(dt<2){const from=t;let nt=t+dt*speed;if(segs&&clip&&segIdx>=0&&!clip.paused&&!clip.ended){const at=segs[segIdx].t+clip.currentTime;if(Math.abs(at-nt)<1.5)nt=Math.max(from,at)}const ai=pendingAsk(from,Math.min(lesson.dur,nt));if(ai>=0){t=askAt(ai)-0.07;for(let s=Math.floor(from);s<=Math.floor(t);s++)w[s]='1';update();pause();persist();showAsk(ai);return}const pn=pendingNote(from,Math.min(lesson.dur,nt));if(pn){t=Math.max(from,noteStopAt(pn)-0.05);for(let s=Math.floor(from);s<=Math.floor(t);s++)w[s]='1';update();pause();persist();showNoteStop(pn);return}t=Math.min(lesson.dur,nt);for(let s=Math.floor(from);s<=Math.floor(t);s++)w[s]='1'}
     update();syncMusic();
     if(++saveTick%20===0)persist();
     if(t>=lesson.dur){pause();persist();opts.onEnd&&opts.onEnd(state())}
   }
   function play(){if(stage.querySelector('.ask'))return;if(t>=lesson.dur)t=0;playing=true;last=0;P.classList.add('is-playing');big.hidden=true;pp.innerHTML=I.pause;pp.setAttribute('aria-label','Pause');clearInterval(raf);raf=setInterval(loop,100);if(clips.length)playClip();else{const c=lesson.captions[capIdx];if(c)speak(c[1])}}
-  function pause(){playing=false;P.classList.remove('is-playing');clearInterval(raf);stopClip();syncMusic();pp.innerHTML=I.play;pp.setAttribute('aria-label','Play');big.hidden=false;try{speechSynthesis.cancel()}catch(e){}}
+  function pause(){stopCue();playing=false;P.classList.remove('is-playing');clearInterval(raf);stopClip();syncMusic();pp.innerHTML=I.play;pp.setAttribute('aria-label','Play');big.hidden=false;try{speechSynthesis.cancel()}catch(e){}}
   function seek(to){
     to=Math.max(0,Math.min(lesson.dur,to));
     if(opts.restrictSeek&&to>maxReached()+1){toast('You can skip ahead once you have watched this part.');to=maxReached()}
