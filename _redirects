@@ -1,5 +1,2 @@
-# Send the .co.uk addresses to the main .com site (permanent redirect)
-https://foreseetraining.co.uk/*      https://foreseetraining.com/:splat  301!
-http://foreseetraining.co.uk/*       https://foreseetraining.com/:splat  301!
-https://www.foreseetraining.co.uk/*  https://foreseetraining.com/:splat  301!
-http://www.foreseetraining.co.uk/*   https://foreseetraining.com/:splat  301!
+# Parent join links (the page also reads these itself)
+/join/:code  /?join=:code  302
