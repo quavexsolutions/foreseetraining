@@ -15,5 +15,37 @@
     if (!r.ok) { var err = new Error((j && j.error) || "Something went wrong. Please try again."); err.code = j && j.code; err.status = r.status; throw err; }
     return j;
   }
-  window.FT = { live: live, sb: sb, call: call };
+  // Cloudflare Turnstile: checks a real person (not a bot) is signing up, signing in or sending a form.
+  // Switched on by adding turnstileSiteKey to config.js (plus the secret key in Supabase). Most people only see a small "Verifying…" tick.
+  var tsLoading = null, tsBox = null, tsId = null;
+  function humanErr() { var e = new Error("We couldn’t check that you’re a real person. Please refresh the page and try again."); e.code = "captcha"; return e; }
+  function tsScript() {
+    if (window.turnstile) return Promise.resolve();
+    if (!tsLoading) tsLoading = new Promise(function (ok, no) {
+      var s = document.createElement("script");
+      s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"; s.async = true;
+      s.onload = function () { ok(); }; s.onerror = function () { tsLoading = null; no(humanErr()); };
+      document.head.appendChild(s);
+    });
+    return tsLoading;
+  }
+  async function human() {
+    if (!C.turnstileSiteKey) return undefined;
+    await tsScript();
+    if (!tsBox) { tsBox = document.createElement("div"); tsBox.style.cssText = "position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:9999;border-radius:12px"; document.body.appendChild(tsBox); }
+    return new Promise(function (ok, no) {
+      var done = false;
+      function card(on) { tsBox.style.background = on ? "#fff" : ""; tsBox.style.padding = on ? "10px" : ""; tsBox.style.boxShadow = on ? "0 8px 30px rgba(0,0,0,.2)" : ""; }
+      function finish(f, v) { if (done) return; done = true; clearTimeout(t); card(false); f(v); }
+      var t = setTimeout(function () { finish(no, humanErr()); }, 120000);
+      try {
+        if (tsId !== null) { try { window.turnstile.remove(tsId); } catch (e) {} }
+        tsId = window.turnstile.render(tsBox, { sitekey: C.turnstileSiteKey, appearance: "interaction-only", execution: "execute",
+          callback: function (tok) { finish(ok, tok); }, "error-callback": function () { finish(no, humanErr()); return true; },
+          "before-interactive-callback": function () { card(true); }, "after-interactive-callback": function () { card(false); } });
+        window.turnstile.execute(tsId);
+      } catch (e) { finish(no, humanErr()); }
+    });
+  }
+  window.FT = { live: live, sb: sb, call: call, human: human };
 })();

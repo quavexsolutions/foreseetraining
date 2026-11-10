@@ -2301,6 +2301,7 @@ VIEWS.register=()=>{const pf=(PARAMS.prefill)||{};return `
   <div class="field"><label for="r-pw2">Confirm password</label><div class="pw-wrap"><input type="password" id="r-pw2" autocomplete="new-password"><button type="button">Show</button></div><span class="err" id="r-pw2-e"></span></div>
  </div>
  <label class="checkbox"><input type="checkbox" id="r-terms"> <span>I agree to the <button type="button" class="btn-link" data-go="policy" data-p="terms">terms</button> and have read the <button type="button" class="btn-link" data-go="policy" data-p="privacy">privacy notice</button>.</span></label><span class="err" id="r-terms-e" style="color:var(--bad);font-size:.82rem;font-weight:600"></span>
+ <label class="checkbox"><input type="checkbox" id="r-news"> <span>Email me occasional news and offers from Foresee Training <span class="muted">(optional)</span>. You can stop them at any time from your account.</span></label>
  <div class="row between"><span class="small muted">Already registered? <button type="button" class="btn-link" data-go="login">Sign in</button></span><button class="btn btn-primary" type="submit">Create account and send code</button></div>
 </form></div></section>`};
 function fld(id,label,type,val,ac,hint,cls){return `<div class="field ${cls||''}"><label for="${id}">${label}</label><input type="${type}" id="${id}" value="${esc(val||'')}" autocomplete="${ac||'off'}" ${hint?`aria-describedby="${id}-h"`:''}>${hint?`<span class="hint" id="${id}-h">${hint}</span>`:''}<span class="err" id="${id}-e"></span></div>`}
@@ -2319,7 +2320,7 @@ AFTER.register=()=>{
     if($('#r-pw2').value!==pw)err('r-pw2','The passwords do not match');
     $('#r-terms-e').textContent=$('#r-terms').checked?'':'Please agree to the terms to continue';if(!$('#r-terms').checked)ok=false;
     if(!ok)return;
-    if(LIVE)return liveSignup({name:v('r-name'),role:v('r-role'),email:v('r-email').toLowerCase()},{name:v('r-school'),address:v('r-addr'),postcode:v('r-pc').toUpperCase(),phone:v('r-tel')},pw);
+    if(LIVE)return liveSignup({name:v('r-name'),role:v('r-role'),email:v('r-email').toLowerCase(),marketing:!!($('#r-news')||{}).checked},{name:v('r-school'),address:v('r-addr'),postcode:v('r-pc').toUpperCase(),phone:v('r-tel')},pw);
     S.pending={contact:{name:v('r-name'),role:v('r-role'),email:v('r-email'),password:pw,primary:true},school:{name:v('r-school'),address:v('r-addr'),postcode:v('r-pc').toUpperCase(),phone:v('r-tel')},places:PARAMS.places||30,cid:PARAMS.cid||'sgs',plan:PARAMS.plan||null,band:PARAMS.band||null,code:null,exp:0,tries:0,lockUntil:0,sends:0};
     sendCode();go('verify');
   };
@@ -2392,6 +2393,14 @@ AFTER.login=()=>{
 };
 /* ---------- Change sign-in email: password check, then a six-digit code sent to the NEW address ---------- */
 function myEmail(){if(LIVE)return S.me||'';if(S.session.role==='school')return (S.school.contacts[0]||{}).email||'';const a=learner();return a?a.email:''}
+/* News-and-offers choice. Live: saved with the login (Supabase user details), so it can be exported later. */
+const HUMAN_MSG='We couldn’t check that you’re a real person. Please refresh the page and try again.';
+const newsMeta=on=>on?{marketing:true,marketing_at:new Date().toISOString()}:{marketing:false};
+function myNews(){if(LIVE)return !!S.news;if(S.session.role==='school')return !!(S.school.contacts[0]||{}).marketing;const a=learner();return !!(a&&a.marketing)}
+async function saveNews(on,box){
+  if(LIVE){try{const r=await FT.sb.auth.updateUser({data:on?newsMeta(true):{marketing:false,marketing_at:null}});if(r.error)throw r.error;S.news=on}catch(e){if(box)box.checked=!on;return toast('We couldn’t save that just now. Please try again.')}}
+  else{if(S.session.role==='school'){if(S.school.contacts[0])S.school.contacts[0].marketing=on}else{const a=learner();if(a)S.attendees.filter(x=>x.email===a.email).forEach(x=>x.marketing=on)}save()}
+  toast(on?'Thanks! We’ll send you occasional news and offers.':'Done. We won’t send you news or offers.')}
 function changeEmailModal(){const m=modal('Change your email',`<form id="ce" class="stack" novalidate><p class="muted small">You sign in with <b>${esc(myEmail())}</b>. We’ll send a six-digit code to your new address to check it’s yours.</p>
  <div id="ce-step1" class="stack"><div class="field"><label for="ce-new">New email address</label><input type="email" id="ce-new" autocomplete="email"></div><div class="field"><label for="ce-pw">Your current password</label><div class="pw-wrap"><input type="password" id="ce-pw" autocomplete="current-password"><button type="button">Show</button></div></div></div>
  <div id="ce-step2" hidden class="stack"><div class="field"><label for="ce-code" id="ce-code-l">Six-digit code</label><input type="text" id="ce-code" inputmode="numeric" maxlength="6" class="mono" autocomplete="one-time-code"></div><button type="button" class="btn-link small" id="ce-again" style="align-self:flex-start">Send a new code</button></div>
@@ -2827,7 +2836,7 @@ async function zipCerts(list){
 /* ---------- Account ---------- */
 VIEWS.account=()=>{if(!guard('school'))return false;const s=S.school,c=s.contacts[0];return schoolHead('School account')+`
 <section class="wrap section-tight stack" style="gap:24px;padding-top:16px"><div class="split">
- <form class="card stack" id="acc" novalidate><h3>School details</h3><div class="form-grid">${fld('ac-school','School name','text',s.name,'organization','','full')}${fld('ac-addr','Address','text',s.address,'street-address','','full')}${fld('ac-pc','Postcode','text',s.postcode,'postal-code')}${fld('ac-tel','Telephone','tel',s.phone,'tel')}</div><h3>Main contact</h3><div class="form-grid">${fld('ac-name','Full name','text',c.name,'name')}${fld('ac-role','Role','text',c.role,'organization-title')}<div class="field full"><label for="ac-email">Email (you sign in with this)</label><div class="row" style="flex-wrap:nowrap;gap:8px"><input type="email" id="ac-email" value="${esc(myEmail()||c.email)}" readonly style="opacity:.8"><button class="btn btn-ghost" type="button" id="ac-em" style="white-space:nowrap">Change email</button></div></div></div><div id="ac-msg"></div><div class="row"><button class="btn btn-primary" type="submit">Save details</button><button class="btn btn-ghost" type="button" id="ac-pw">Change password</button></div></form>
+ <form class="card stack" id="acc" novalidate><h3>School details</h3><div class="form-grid">${fld('ac-school','School name','text',s.name,'organization','','full')}${fld('ac-addr','Address','text',s.address,'street-address','','full')}${fld('ac-pc','Postcode','text',s.postcode,'postal-code')}${fld('ac-tel','Telephone','tel',s.phone,'tel')}</div><h3>Main contact</h3><div class="form-grid">${fld('ac-name','Full name','text',c.name,'name')}${fld('ac-role','Role','text',c.role,'organization-title')}<div class="field full"><label for="ac-email">Email (you sign in with this)</label><div class="row" style="flex-wrap:nowrap;gap:8px"><input type="email" id="ac-email" value="${esc(myEmail()||c.email)}" readonly style="opacity:.8"><button class="btn btn-ghost" type="button" id="ac-em" style="white-space:nowrap">Change email</button></div></div></div><div id="ac-msg"></div><div class="row"><button class="btn btn-primary" type="submit">Save details</button><button class="btn btn-ghost" type="button" id="ac-pw">Change password</button></div><label class="checkbox"><input type="checkbox" id="ac-news" ${myNews()?'checked':''}> <span>Email me occasional news and offers from Foresee Training</span></label></form>
  <div class="stack">
   <div class="card stack" style="gap:10px"><h3>Authorised contacts</h3>${s.contacts.map(x=>`<div class="row between" style="flex-wrap:nowrap"><div><b class="small">${esc(x.name)}</b><div class="small muted">${esc(x.email)}</div></div><span class="pill ${x.primary?'teal':''}">${x.primary?'Primary':'Administrator'}</span></div>`).join('')}<button class="btn btn-ghost btn-sm" id="ac-add" style="align-self:flex-start">Invite another administrator</button></div>
   <div class="card stack" style="gap:10px"><h3>Orders and invoices</h3>${S.orders.length?S.orders.map(o=>`<div class="row between" style="flex-wrap:nowrap"><div><b class="mono small">${o.ref}</b><div class="small muted">${esc(orderTitle(o))} · ${fmtD(o.at)} · ${o.sub?'Yearly plan':o.licence?'School licence':o.places+' places'} · ${money(o.total)}</div></div><button class="btn btn-ghost btn-sm" data-inv="${o.ref}">${o.status==='Paid'?'Invoice':esc(o.status)}</button></div>`).join(''):'<p class="small muted">No orders yet.</p>'}</div>
@@ -2837,6 +2846,7 @@ AFTER.account=()=>{
   $('#acc').onsubmit=e=>{e.preventDefault();const v=id=>$('#'+id).value.trim();if(!emailOk(v('ac-email'))){$('#ac-msg').innerHTML='<div class="notice bad small">Enter a valid email.</div>';return}if(LIVE)return liveCall('account',{action:'update_school',school:{name:v('ac-school'),address:v('ac-addr'),postcode:v('ac-pc'),phone:v('ac-tel')},contact:{name:v('ac-name'),role:v('ac-role')}},'Details saved.');Object.assign(S.school,{name:v('ac-school'),address:v('ac-addr'),postcode:v('ac-pc'),phone:v('ac-tel')});Object.assign(S.school.contacts[0],{name:v('ac-name'),role:v('ac-role')});audit('School details updated');save();toast('Details saved.');render()};
   $('#ac-pw').onclick=()=>forgot();
   $('#ac-em').onclick=()=>changeEmail();
+  $('#ac-news').onchange=e=>saveNews(e.target.checked,e.target);
   $('#ac-add').onclick=()=>{const m=modal('Invite an administrator',`<form id="adm" class="stack"><div class="field"><label for="ad-name">Full name</label><input type="text" id="ad-name"></div><div class="field"><label for="ad-email">Work email</label><input type="email" id="ad-email"></div><div id="ad-msg"></div><button class="btn btn-primary" type="submit">Send invitation</button></form>`);$('#adm',m).onsubmit=e=>{e.preventDefault();const n=$('#ad-name').value.trim(),em=$('#ad-email').value.trim();if(!n||!emailOk(em)){$('#ad-msg').innerHTML='<div class="notice bad small">Enter a name and valid email.</div>';return}if(personalEmail(em)){$('#ad-msg').innerHTML=`<div class="notice bad small">${WORK_MSG}</div>`;return}if(LIVE)return liveCall('account',{action:'invite_admin',name:n,email:em},'Invitation sent to '+esc(em)+'.');S.school.contacts.push({name:n,role:'Administrator',email:em,password:'',primary:false});sendEmail(em,'You’ve been added as a school administrator',`<p>${esc(S.school.contacts[0].name)} has added you as an administrator for ${esc(S.school.name)} on Foresee Training.</p>`);audit('Invited administrator '+n);save();closeModal();render()}};
 };
 
@@ -2862,13 +2872,13 @@ VIEWS.learner=()=>{if(!guard('learner'))return false;const a=learner();if(!a){S.
  <div class="stack" style="gap:16px">
   <div class="card stack" style="gap:10px"><h4>Learning objectives</h4><ul class="small" style="margin:0;padding-left:18px">${S.course.objectives.map(o=>`<li>${esc(o)}</li>`).join('')}</ul></div>
   <div class="card"><dl class="kv">${lic?`<dt>Quiz</dt><dd>${a.quiz?a.quiz.score+' of '+a.quiz.total:'Optional'}</dd><dt>Certificate</dt><dd>${a.cert?'Available':'When all lessons are done'}</dd>`:`<dt>Assessment</dt><dd>${passed(a)?'Passed':a.attempts.length?'Not yet passed':allDone?'Available':'Locked'}</dd><dt>Certificate</dt><dd>${a.cert?'Available':'Not yet available'}</dd><dt>Pass mark</dt><dd>${S.cfg.passMark}%</dd>`}</dl></div>
-  <div class="card stack" style="gap:10px"><h4>Your account</h4><div class="small"><span class="muted">You sign in with</span><br><b style="word-break:break-all">${esc(myEmail()||a.email)}</b></div><div class="row" style="gap:8px"><button class="btn btn-ghost btn-sm" id="ld-email">Change email</button><button class="btn btn-ghost btn-sm" id="ld-pw">Change password</button></div></div>
+  <div class="card stack" style="gap:10px"><h4>Your account</h4><div class="small"><span class="muted">You sign in with</span><br><b style="word-break:break-all">${esc(myEmail()||a.email)}</b></div><div class="row" style="gap:8px"><button class="btn btn-ghost btn-sm" id="ld-email">Change email</button><button class="btn btn-ghost btn-sm" id="ld-pw">Change password</button></div><label class="checkbox small"><input type="checkbox" id="ld-news" ${myNews()?'checked':''}> <span>Email me news and offers</span></label></div>
   <div class="notice small"><span>Watch at least ${S.cfg.completionPct}% of each video and open its key notes to complete a lesson. Every lesson also has a text version.</span></div>
  </div>
 </div></section>`};
 AFTER.learner=()=>{
   const cf=$('#conf-form');if(cf){cf.onsubmit=e=>{e.preventDefault();const a=learner(),which=cf.dataset.which,n=S.course.confidence.length,vals=[];for(let i=0;i<n;i++){const r=$(`input[name=conf${i}]:checked`,cf);if(!r){$('#conf-msg').innerHTML='<div class="notice bad small"><span>Choose an answer for each line, or skip.</span></div>';return}vals.push(+r.value)}a.conf=a.conf||{};a.conf[which]=vals;save();if(LIVE)liveCall('learn',{action:'conf',attendee:a.id,which,vals},null,true);toast(which==='before'?'Thanks. You’re ready to start.':'Thanks for your feedback.');render()};$('#conf-skip').onclick=()=>{const a=learner();a.conf=a.conf||{};a.conf[cf.dataset.which]='skipped';save();if(LIVE)liveCall('learn',{action:'conf',attendee:a.id,which:cf.dataset.which,vals:'skipped'},null,true);render()}}
-  $$('[data-lesson]').forEach(b=>{if(!$('#conf-form')||$('#conf-form').dataset.which!=='before')return;b.addEventListener('click',e=>{e.stopImmediatePropagation();$('#conf-form').scrollIntoView({behavior:'smooth',block:'center'});toast('Please answer the three quick questions first, or skip them.')},true)});[$('#ld-quiz'),$('#ld-quiz2')].forEach(b=>{if(b)b.onclick=startQuiz});$$('[data-switch]').forEach(b=>b.onclick=()=>{S.session.user=b.dataset.switch;save();render()});$$('[data-lesson]').forEach(b=>b.onclick=()=>go('lesson',{i:+b.dataset.lesson}));const s=$('#ld-assess')||$('#ld-assess2');if(s)s.onclick=()=>startAssessment();const s2=$('#ld-assess2');if(s2)s2.onclick=()=>startAssessment();$$('[data-cert]').forEach(b=>b.onclick=()=>go('certificate'));const le=$('#ld-email');if(le)le.onclick=()=>changeEmail();const lp=$('#ld-pw');if(lp)lp.onclick=()=>forgot()};
+  $$('[data-lesson]').forEach(b=>{if(!$('#conf-form')||$('#conf-form').dataset.which!=='before')return;b.addEventListener('click',e=>{e.stopImmediatePropagation();$('#conf-form').scrollIntoView({behavior:'smooth',block:'center'});toast('Please answer the three quick questions first, or skip them.')},true)});[$('#ld-quiz'),$('#ld-quiz2')].forEach(b=>{if(b)b.onclick=startQuiz});$$('[data-switch]').forEach(b=>b.onclick=()=>{S.session.user=b.dataset.switch;save();render()});$$('[data-lesson]').forEach(b=>b.onclick=()=>go('lesson',{i:+b.dataset.lesson}));const s=$('#ld-assess')||$('#ld-assess2');if(s)s.onclick=()=>startAssessment();const s2=$('#ld-assess2');if(s2)s2.onclick=()=>startAssessment();$$('[data-cert]').forEach(b=>b.onclick=()=>go('certificate'));const le=$('#ld-email');if(le)le.onclick=()=>changeEmail();const ln=$('#ld-news');if(ln)ln.onchange=e=>saveNews(e.target.checked,e.target);const lp=$('#ld-pw');if(lp)lp.onclick=()=>forgot()};
 
 VIEWS.lesson=()=>{if(!guard('learner'))return false;const a=learner(),ls=allLessons(),i=PARAMS.i||0,{m,l}=ls[i];if(!canStart(a,i)){toast('Complete the previous module first.');return VIEWS.learner()}
   return `<section class="wrap app-head stack" style="gap:8px;padding-bottom:14px"><div class="crumbs"><button data-go="learner">My training</button><span>/</span><span>Module ${i+1}</span></div><h1 style="font-size:clamp(1.4rem,2.8vw,2rem)">${esc(m.title)}</h1><p class="muted small">${esc(l.title)} · <span class="mono">${fmtT(l.dur)}</span> · ${l.notes.length} interactive notes</p></section>
@@ -2965,6 +2975,7 @@ VIEWS.join=()=>{const L=LIVE?Object.values(S.courses).filter(c=>c.licence):paren
  <div class="field"><label for="j-email">Email address</label><input type="email" id="j-email" autocomplete="email"></div>
  <div class="field"><label for="j-pw">Create a password</label><div class="pw-wrap"><input type="password" id="j-pw" autocomplete="new-password"><button type="button">Show</button></div><span class="hint">${PW_RULE}</span></div>
  <label class="checkbox"><input type="checkbox" id="j-ok"> <span>I agree to the <button type="button" class="btn-link" data-go="policy" data-p="terms">terms</button> and have read the <button type="button" class="btn-link" data-go="policy" data-p="privacy">privacy notice</button>. My school sees totals only, not my details.</span></label>
+ <label class="checkbox"><input type="checkbox" id="j-news"> <span>Email me occasional news and offers from Foresee Training <span class="muted">(optional)</span>. You can stop them at any time from your account.</span></label>
  <div id="j-msg" aria-live="polite"></div><button class="btn btn-primary" type="submit">Join and start</button>
  <p class="small muted">Already joined? <button type="button" class="btn-link" data-go="login">Sign in</button></p>
 </form></div></section>`};
@@ -3220,7 +3231,7 @@ function updateTour(){if(LIVE)return;
 /* ---------- Live mode: the real server (Supabase). Only used when config.js has the project details. ---------- */
 function liveReset(){
   S.school={id:null,name:'',address:'',postcode:'',phone:'',contacts:[],joinCode:'',verified:true};
-  S.attendees=[];S.orders=[];S.subscription=null;S.audit=[];S.inbox=[];S.leads=[];S.me='';S.session={role:'public',user:null};
+  S.attendees=[];S.orders=[];S.subscription=null;S.audit=[];S.inbox=[];S.leads=[];S.me='';S.news=false;S.session={role:'public',user:null};
   try{S.pending=JSON.parse(sessionStorage.getItem('ft_pending')||'null')}catch(e){S.pending=null}
 }
 // Put what the server sent into the page's data, keeping the person on the course they were looking at
@@ -3233,7 +3244,7 @@ function applySnap(r){
   }else{const was=S.session.role;liveReset();if(r.role==='admin'&&was!=='admin')toast('Signed in. Platform administration is done in Supabase for now.')}
 }
 const liveErr=e=>toast(esc((e&&e.message)||'Something went wrong. Please try again.'));
-async function liveRefresh(){applySnap(await FT.call('account',{action:'bootstrap'}));try{const u=(await FT.sb.auth.getSession()).data.session;S.me=u&&u.user?(u.user.email||'').toLowerCase():''}catch(e){}}
+async function liveRefresh(){applySnap(await FT.call('account',{action:'bootstrap'}));try{const u=(await FT.sb.auth.getSession()).data.session;S.me=u&&u.user?(u.user.email||'').toLowerCase():'';S.news=!!(u&&u.user&&u.user.user_metadata&&u.user.user_metadata.marketing)}catch(e){}}
 function liveHome(){go(S.session.role==='school'?'school':S.session.role==='learner'?'learner':'home')}
 function busyBtn(sel,on,label){const b=typeof sel==='string'?$(sel):sel;if(!b)return;if(on){b.dataset.label=b.textContent;b.disabled=true;b.textContent=label||'Please wait…'}else{b.disabled=false;if(b.dataset.label)b.textContent=b.dataset.label}}
 
@@ -3260,12 +3271,12 @@ async function liveBoot(hash){
 
 async function liveSignup(contact,school,pw){
   const btn=$('#reg button[type=submit]');busyBtn(btn,true,'Creating your account…');
-  try{const {error}=await FT.sb.auth.signUp({email:contact.email,password:pw,options:{data:{name:contact.name}}});if(error)throw error}
+  try{const {error}=await FT.sb.auth.signUp({email:contact.email,password:pw,options:{data:Object.assign({name:contact.name},newsMeta(contact.marketing)),captchaToken:await FT.human()}});if(error)throw error}
   catch(e){busyBtn(btn,false);$('#r-email-e').textContent=/registered|exists/i.test(e.message||'')?'This email already has an account. Sign in instead.':(e.message||'We couldn’t create your account. Please try again.');return}
   S.pending={contact,school,places:PARAMS.places||30,cid:PARAMS.cid||'sgs',plan:PARAMS.plan||null,band:PARAMS.band||null,exp:Date.now()+3600e3,sends:1,tries:0,lockUntil:0};save();go('verify');
 }
 async function liveResend(){const p=S.pending;if(!p)return go('register');if(p.sends>=5){$('#vf-msg').innerHTML='<div class="notice warn">Too many codes requested. Please wait a few minutes.</div>';return}
-  try{const {error}=await FT.sb.auth.resend({type:'signup',email:p.contact.email});if(error)throw error;p.sends++;p.exp=Date.now()+3600e3;save();toast('A new code is on its way.')}catch(e){liveErr(e)}}
+  try{const {error}=await FT.sb.auth.resend({type:'signup',email:p.contact.email,options:{captchaToken:await FT.human()}});if(error)throw error;p.sends++;p.exp=Date.now()+3600e3;save();toast('A new code is on its way.')}catch(e){liveErr(e)}}
 async function liveVerify(code,m,boxes){const p=S.pending;const btn=$('#vf button[type=submit]');busyBtn(btn,true,'Checking…');
   try{const {error}=await FT.sb.auth.verifyOtp({email:p.contact.email,token:code,type:'signup'});if(error)throw error}
   catch(e){busyBtn(btn,false);m.innerHTML='<div class="notice bad">That code is not right or has expired. Check the latest email, or send a new code.</div>';boxes.forEach(b=>b.value='');boxes[0].focus();return}
@@ -3274,7 +3285,7 @@ async function liveVerify(code,m,boxes){const p=S.pending;const btn=$('#vf butto
   if(p.plan)go('subscribe',{tier:p.plan,band:p.band||'m'});else go('basket',{places:p.places,cid:p.cid||'sgs'});
 }
 async function liveLogin(em,pw){const btn=$('#lf button[type=submit]');busyBtn(btn,true,'Signing in…');const msg=t=>{busyBtn(btn,false);$('#l-msg').innerHTML=`<div class="notice bad">${t}</div>`};
-  try{const {error}=await FT.sb.auth.signInWithPassword({email:em,password:pw});if(error)return msg(/confirm/i.test(error.message)?'Please verify your email first: use the code we sent when you registered.':'The email or password is not right. Check them and try again.')}catch(e){return msg('We couldn’t reach the server. Check your connection and try again.')}
+  try{const {error}=await FT.sb.auth.signInWithPassword({email:em,password:pw,options:{captchaToken:await FT.human()}});if(error)return msg(/captcha/i.test(error.message)?HUMAN_MSG:/confirm/i.test(error.message)?'Please verify your email first: use the code we sent when you registered.':'The email or password is not right. Check them and try again.')}catch(e){return msg('We couldn’t reach the server. Check your connection and try again.')}
   try{await liveRefresh()}catch(e){return msg(esc(e.message))}
   if(S.session.role==='public'){await FT.sb.auth.signOut();return msg('This account isn’t linked to a school or course yet. If your school invited you, use the link in your invitation email.')}
   toast('Signed in.');liveHome();
@@ -3284,7 +3295,7 @@ function liveForgot(){
   let sent=false,em='';
   $('#fp',m).onsubmit=async e=>{e.preventDefault();const msg=(t,k)=>$('#fp-msg').innerHTML=`<div class="notice ${k||'bad'} small">${t}</div>`;
     if(!sent){em=$('#fp-email').value.trim().toLowerCase();if(!emailOk(em))return msg('Enter a valid email address.');busyBtn('#fp-btn',true,'Sending…');
-      try{await FT.sb.auth.resetPasswordForEmail(em)}catch(e){}busyBtn('#fp-btn',false);sent=true;$('#fp-step2').hidden=false;$('#fp-btn').textContent='Set new password';msg('If that email is registered, a code is on its way. Check your spam folder too.','');return}
+      try{const rr=await FT.sb.auth.resetPasswordForEmail(em,{captchaToken:await FT.human()});if(rr&&rr.error&&/captcha/i.test(rr.error.message))throw rr.error}catch(e){if(e&&(e.code==='captcha'||/captcha/i.test(e.message||''))){busyBtn('#fp-btn',false);return msg(HUMAN_MSG)}}busyBtn('#fp-btn',false);sent=true;$('#fp-step2').hidden=false;$('#fp-btn').textContent='Set new password';msg('If that email is registered, a code is on its way. Check your spam folder too.','');return}
     const code=$('#fp-code').value.trim(),pw=$('#fp-pw').value;if(!/^\d{6}$/.test(code))return msg('Enter the six-digit code from the email.');if(pwBad(pw))return msg('Your password needs at least 8 characters, including at least one capital letter, at least one small letter, at least one number and at least one symbol (like ! or ?).');
     busyBtn('#fp-btn',true,'Saving…');
     try{let r=await FT.sb.auth.verifyOtp({email:em,token:code,type:'recovery'});if(r.error)throw r.error;r=await FT.sb.auth.updateUser({password:pw});if(r.error)throw r.error}catch(e){busyBtn('#fp-btn',false);return msg('That code is not right or has expired. Send a new one and try again.')}
@@ -3295,7 +3306,8 @@ async function liveLogout(){liveFlush();try{await FT.sb.auth.signOut()}catch(e){
 // Invitation links: staff and extra school administrators create their password here
 function liveActivateView(){return `<section class="wrap"><div class="auth-shell"><form class="card raised stack" id="act" novalidate style="gap:18px"><p class="eyebrow" id="act-school">Your invitation</p><h2 id="act-title">Checking your invitation…</h2><p class="muted" id="act-intro"></p>
  <div id="act-fields" hidden class="stack" style="gap:14px"><div class="field"><label for="ac-p1">Create a password</label><div class="pw-wrap"><input type="password" id="ac-p1" autocomplete="new-password"><button type="button">Show</button></div><span class="hint">${PW_RULE}</span></div>
- <div class="field"><label for="ac-p2">Confirm password</label><div class="pw-wrap"><input type="password" id="ac-p2" autocomplete="new-password"><button type="button">Show</button></div></div><button class="btn btn-primary" type="submit" id="act-btn">Activate account</button></div>
+ <div class="field"><label for="ac-p2">Confirm password</label><div class="pw-wrap"><input type="password" id="ac-p2" autocomplete="new-password"><button type="button">Show</button></div></div><label class="checkbox"><input type="checkbox" id="act-news"> <span>Email me occasional news and offers from Foresee Training <span class="muted">(optional)</span>. You can stop them at any time from your account.</span></label>
+ <p class="small muted">By activating your account you agree to the <button type="button" class="btn-link" data-go="policy" data-p="terms">terms</button> and confirm you have read the <button type="button" class="btn-link" data-go="policy" data-p="privacy">privacy notice</button>.</p><button class="btn btn-primary" type="submit" id="act-btn">Activate account</button></div>
  <div id="act-msg"></div></form></div></section>`}
 async function liveActivateBind(){
   const t=PARAMS.token||'';let info=null;
@@ -3306,9 +3318,9 @@ async function liveActivateBind(){
   $('#act').onsubmit=async e=>{e.preventDefault();const p=$('#ac-p1').value,bad=x=>$('#act-msg').innerHTML=`<div class="notice bad small">${x}</div>`;
     if(pwBad(p))return bad('Your password needs at least 8 characters, including at least one capital letter, at least one small letter, at least one number and at least one symbol (like ! or ?).');if(p!==$('#ac-p2').value)return bad('The passwords do not match.');
     busyBtn('#act-btn',true,'Activating…');
-    try{const r=await FT.call('public',{action:'activate',token:t,password:p});
+    try{const r=await FT.call('public',{action:'activate',token:t,password:p,marketing:!!($('#act-news')||{}).checked,captcha:await FT.human()});
       if(r.exists){busyBtn('#act-btn',false);$('#act-fields').hidden=true;$('#act-msg').innerHTML=`<div class="notice"><span>You already have a Foresee account with <b>${esc(r.email)}</b>. Sign in with your existing password and your new ${info.kind==='admin'?'school':'course'} will be there. <button type="button" class="btn-link" data-go="login">Sign in</button></span></div>`;bindCommon($('#act'));return}
-      const s=await FT.sb.auth.signInWithPassword({email:r.email,password:p});if(s.error)throw s.error;await liveRefresh();
+      const s=await FT.sb.auth.signInWithPassword({email:r.email,password:p,options:{captchaToken:await FT.human()}});if(s.error)throw s.error;await liveRefresh();
       try{history.replaceState(null,'',location.pathname)}catch(x){}toast('Account activated.');liveHome()}
     catch(x){busyBtn('#act-btn',false);bad(esc(x.message||'Please try again.'))}};
 }
@@ -3325,8 +3337,8 @@ async function liveJoin(code,name,em,pw,bad){
   if(!signedIn){if(!name)return bad('Enter your name.');if(!emailOk(em))return bad('Enter a valid email address, like name@example.com.');if(pwBad(pw))return bad('Your password needs at least 8 characters, including at least one capital letter, at least one small letter, at least one number and at least one symbol (like ! or ?).')}
   if(!$('#j-ok').checked)return bad('Please agree to the terms to continue.');
   const btn=$('#jf button[type=submit]');busyBtn(btn,true,'Joining…');
-  try{const r=await FT.call('public',{action:'join',code,courses:picked,name,email:em,password:pw});
-    if(!signedIn){const s=await FT.sb.auth.signInWithPassword({email:r.email,password:pw});if(s.error)throw s.error}
+  try{const r=await FT.call('public',{action:'join',code,courses:picked,name,email:em,password:pw,marketing:!!($('#j-news')||{}).checked,captcha:signedIn?undefined:await FT.human()});
+    if(!signedIn){const s=await FT.sb.auth.signInWithPassword({email:r.email,password:pw,options:{captchaToken:await FT.human()}});if(s.error)throw s.error}
     await liveRefresh();toast('Welcome. You can start the first lesson now.');go('learner')}
   catch(e){busyBtn(btn,false);bad(esc(e.message)+(e.code==='exists'||e.code==='joined'?' <button type="button" class="btn-link" data-go="login">Sign in</button>':''))}
 }
@@ -3347,7 +3359,7 @@ function liveChangeEmail(){
   $('#ce',m).onsubmit=async e=>{e.preventDefault();
     if(step===1){nu=$('#ce-new').value.trim().toLowerCase();if(!emailOk(nu))return ceMsg('Enter a valid email address.');if(nu===cur.toLowerCase())return ceMsg('That’s the email you already use.');if(S.session.role==='school'&&personalEmail(nu))return ceMsg(WORK_MSG);
       busyBtn('#ce-btn',true,'Sending…');
-      try{const r=await FT.sb.auth.signInWithPassword({email:cur,password:$('#ce-pw').value});if(r.error){busyBtn('#ce-btn',false);return ceMsg('Your password is not right.')}}catch(x){busyBtn('#ce-btn',false);return ceMsg('We couldn’t reach the server. Check your connection and try again.')}
+      try{const r=await FT.sb.auth.signInWithPassword({email:cur,password:$('#ce-pw').value,options:{captchaToken:await FT.human()}});if(r.error){busyBtn('#ce-btn',false);return ceMsg(/captcha/i.test(r.error.message)?HUMAN_MSG:'Your password is not right.')}}catch(x){busyBtn('#ce-btn',false);return ceMsg('We couldn’t reach the server. Check your connection and try again.')}
       try{await ask()}catch(x){busyBtn('#ce-btn',false);return ceMsg(nice(x))}
       busyBtn('#ce-btn',false);step=2;ceStep2(nu);ceMsg('Check your new inbox for the six-digit code. Check your spam folder too.','');return}
     const code=$('#ce-code').value.trim();if(!/^\d{6}$/.test(code))return ceMsg('Enter the six-digit code from the email.');
@@ -3395,9 +3407,9 @@ async function liveAssess(a){const id=ASM.id;
   catch(e){ASM.submitted=false;liveErr(e)}}
 
 // Public forms
-async function liveLead(em,r,draw){try{await FT.call('public',{action:'lead',email:em,staff:CHK.staff,score:r.score,tier:r.tier,band:r.band});CHK.sent=em;draw();toast('Plan sent. Check your inbox.')}catch(e){$('#chk-err').textContent=e.message}}
+async function liveLead(em,r,draw){try{await FT.call('public',{action:'lead',email:em,staff:CHK.staff,score:r.score,tier:r.tier,band:r.band,captcha:await FT.human()});CHK.sent=em;draw();toast('Plan sent. Check your inbox.')}catch(e){$('#chk-err').textContent=e.message}}
 async function liveContact(){const o=$('#ct-out'),btn=$('#contact-form button[type=submit]');busyBtn(btn,true,'Sending…');
-  try{await FT.call('public',{action:'contact',name:$('#ct-name').value,email:$('#ct-email').value,message:$('#ct-msg').value});o.innerHTML='<div class="notice ok">Thanks. Your message has been sent. We usually reply within one working day.</div>';$('#contact-form').reset()}
+  try{await FT.call('public',{action:'contact',name:$('#ct-name').value,email:$('#ct-email').value,message:$('#ct-msg').value,captcha:await FT.human()});o.innerHTML='<div class="notice ok">Thanks. Your message has been sent. We usually reply within one working day.</div>';$('#contact-form').reset()}
   catch(e){o.innerHTML=`<div class="notice bad">${esc(e.message)}</div>`}busyBtn(btn,false)}
 async function liveVerifyCert(ref){const o=$('#vc-out');o.innerHTML='<p class="small muted">Checking…</p>';
   try{const r=await FT.call('public',{action:'verify',ref});
