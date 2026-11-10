@@ -4,6 +4,6 @@
 window.FT_CONFIG = {
   supabaseUrl: "https://nonwrbbwsywfddccbbvf.supabase.co",
   supabaseKey: "sb_publishable_NsuZstQHCCZyEYiWqtGeOg_pex3IZyt",
-  turnstileSiteKey: "0x4AAAAAAF6p94H8iUsnF08a",
+  turnstileSitekey: "0x4AAAAAAF6p94H8iUsnF08a",
   supportEmail: "support@foreseetraining.com"
 };
