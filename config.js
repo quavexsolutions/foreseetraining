@@ -4,7 +4,7 @@
 window.FABLEFOX_CONFIG = {
   supabaseUrl: "https://nonwrbbwsywfddccbbvf.supabase.co",
   supabaseKey: "sb_publishable_NsuZstQHCCZyEYiWqtGeOg_pex3IZyt",
-  turnstileSiteKey: "0x4AAAAAAF6p94H8iUsnF08a"
+  turnstileSiteKey: "0x4AAAAAAF6p94H8iUsnF08a",
 
   /* Where people contact you (shown in the footer and legal pages). */
   supportEmail: "contact@fablefoxstories.co.uk",
