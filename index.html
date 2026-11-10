@@ -246,7 +246,7 @@ input.invalid{border-color:var(--bad)}
 .code-boxes input:focus{padding:0}
 .auth-shell{max-width:560px;margin:48px auto}
 .checkbox{display:flex;gap:10px;align-items:flex-start;font-size:.92rem}
-.checkbox input{margin-top:4px;accent-color:var(--teal);width:16px;height:16px}
+.checkbox input{margin-top:3px;accent-color:var(--teal);width:18px;height:18px;flex:0 0 18px}
 
 /* Tables */
 .table-wrap{position:relative;overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
@@ -2305,7 +2305,7 @@ VIEWS.register=()=>{const pf=(PARAMS.prefill)||{};return `
   <div class="field"><label for="r-pw">Password</label><div class="pw-wrap"><input type="password" id="r-pw" autocomplete="new-password" aria-describedby="r-pw-h"><button type="button">Show</button></div><span class="hint" id="r-pw-h">${PW_RULE}</span><span class="err" id="r-pw-e"></span></div>
   <div class="field"><label for="r-pw2">Confirm password</label><div class="pw-wrap"><input type="password" id="r-pw2" autocomplete="new-password"><button type="button">Show</button></div><span class="err" id="r-pw2-e"></span></div>
  </div>
- <label class="checkbox"><input type="checkbox" id="r-terms"> <span>I agree to the <button type="button" class="btn-link" data-go="policy" data-p="terms">terms</button> and have read the <button type="button" class="btn-link" data-go="policy" data-p="privacy">privacy notice</button>.</span></label><span class="err" id="r-terms-e" style="color:var(--bad);font-size:.82rem;font-weight:600"></span>
+ <label class="checkbox"><input type="checkbox" id="r-terms"> <span>I agree to the <button type="button" class="btn-link" data-go="policy" data-p="terms">terms</button> and have read the <button type="button" class="btn-link" data-go="policy" data-p="privacy">privacy notice</button> <span class="muted">(required)</span>.</span></label><span class="err" id="r-terms-e" style="color:var(--bad);font-size:.82rem;font-weight:600"></span>
  <label class="checkbox"><input type="checkbox" id="r-news"> <span>Email me occasional news and offers from Foresee Training <span class="muted">(optional)</span>. You can stop them at any time from your account.</span></label>
  <div class="ts-slot"></div>
  <div class="row between"><span class="small muted">Already registered? <button type="button" class="btn-link" data-go="login">Sign in</button></span><button class="btn btn-primary" type="submit">Create account and send code</button></div>
@@ -2981,7 +2981,7 @@ VIEWS.join=()=>{const L=LIVE?Object.values(S.courses).filter(c=>c.licence):paren
  <div class="field"><label for="j-name">Your name</label><input type="text" id="j-name" autocomplete="name"></div>
  <div class="field"><label for="j-email">Email address</label><input type="email" id="j-email" autocomplete="email"></div>
  <div class="field"><label for="j-pw">Create a password</label><div class="pw-wrap"><input type="password" id="j-pw" autocomplete="new-password"><button type="button">Show</button></div><span class="hint">${PW_RULE}</span></div>
- <label class="checkbox"><input type="checkbox" id="j-ok"> <span>I agree to the <button type="button" class="btn-link" data-go="policy" data-p="terms">terms</button> and have read the <button type="button" class="btn-link" data-go="policy" data-p="privacy">privacy notice</button>. My school sees totals only, not my details.</span></label>
+ <label class="checkbox"><input type="checkbox" id="j-ok"> <span>I agree to the <button type="button" class="btn-link" data-go="policy" data-p="terms">terms</button> and have read the <button type="button" class="btn-link" data-go="policy" data-p="privacy">privacy notice</button> <span class="muted">(required)</span>. My school sees totals only, not my details.</span></label>
  <label class="checkbox"><input type="checkbox" id="j-news"> <span>Email me occasional news and offers from Foresee Training <span class="muted">(optional)</span>. You can stop them at any time from your account.</span></label>
  <div class="ts-slot"></div><div id="j-msg" aria-live="polite"></div><button class="btn btn-primary" type="submit">Join and start</button>
  <p class="small muted">Already joined? <button type="button" class="btn-link" data-go="login">Sign in</button></p>
