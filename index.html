@@ -601,9 +601,10 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 .track .mk.ess{background:#F2C14E}
 .track .mk.seen{opacity:.45}
 /* Caption strip under the video, so subtitles never cover the slides */
-.cc-bar{display:flex;align-items:center;gap:14px;min-height:64px;padding:10px 18px;background:linear-gradient(90deg,#0B1D3A,#0A1830);border-top:1px solid rgba(43,196,188,.25)}
+.cc-bar{--cc-fs:clamp(14px,1.55vw,18px);--cc-lines:2;display:flex;align-items:center;gap:14px;box-sizing:border-box;height:calc(var(--cc-lines) * 1.45 * var(--cc-fs) + 22px);overflow:hidden;padding:10px 18px;background:linear-gradient(90deg,#0B1D3A,#0A1830);border-top:1px solid rgba(43,196,188,.25)}
 .player.cc-off .cc-bar{display:none}
-.cc-bar .cc{position:static;transform:none;max-width:none;flex:1;background:none;padding:0;border-radius:0;text-align:left;color:#EAF2F6;font-size:clamp(14px,1.55vw,18px);line-height:1.45;pointer-events:none;animation:ccIn .35s ease}
+@media (max-width:700px){.cc-bar{--cc-lines:3}}
+.cc-bar .cc{max-height:100%;position:static;transform:none;max-width:none;flex:1;background:none;padding:0;border-radius:0;text-align:left;color:#EAF2F6;font-size:var(--cc-fs);line-height:1.45;pointer-events:none;animation:ccIn .35s ease}
 .cc-bar .cc:empty{display:block}
 .cc-bar .cc:empty::before{content:"Captions will appear here";color:rgba(234,242,246,.38);font-style:italic}
 .cc-wave{display:flex;align-items:flex-end;gap:3px;height:22px;flex:none}
@@ -1934,6 +1935,7 @@ function mountPlayer(host,lesson,opts){
     <div class="nview" hidden></div>
    </aside></div>`;
   const P=host.querySelector('.player'),stage=$('.stage',P),scEl=$('.scene',P),ccEl=$('.cc',P),slot=$('.pop-slot',P),big=$('.big-play',P),pp=$('.pp',P),cur=$('.cur',P),track=$('.track',P),played=$('.played',P),watched=$('.watched',P),knob=$('.knob',P),nlist=$('.nlist',P),nview=$('.nview',P),count=$('.count',P);
+  const fitCC=()=>{ccEl.style.fontSize='';let f=parseFloat(getComputedStyle(ccEl).fontSize);const box=ccEl.parentNode;for(let k=0;k<12&&ccEl.scrollHeight>box.clientHeight-18&&f>11;k++){f-=1;ccEl.style.fontSize=f+'px'}};
 
   function renderScene(i){
     const s=lesson.scenes[i];sceneIdx=i;
@@ -1997,7 +1999,7 @@ function mountPlayer(host,lesson,opts){
     if(sIdx!==sceneIdx)renderScene(sIdx);
     itemsOn();
     const cIdx=lesson.captions.reduce((a,c,i)=>t>=c[0]?i:a,-1);
-    if(cIdx!==capIdx){capIdx=cIdx;const txt=cIdx>=0?lesson.captions[cIdx][1]:'';ccEl.textContent=ccOn?txt:'';if(playing&&txt&&!segs){if(clips.length)playClip();else speak(txt)}opts.onTick&&opts.onTick(t,cIdx)}
+    if(cIdx!==capIdx){capIdx=cIdx;const txt=cIdx>=0?lesson.captions[cIdx][1]:'';ccEl.textContent=ccOn?txt:'';fitCC();if(playing&&txt&&!segs){if(clips.length)playClip();else speak(txt)}opts.onTick&&opts.onTick(t,cIdx)}
     if(segs&&playing&&segAt(t)!==segIdx)playClip();
     const pct=t/lesson.dur*100;played.style.width=pct+'%';knob.style.left=pct+'%';watched.style.width=(opts.restrictSeek?maxReached()/lesson.dur*100:100)+'%';
     cur.textContent=fmtT(t);track.setAttribute('aria-valuenow',Math.floor(t));track.setAttribute('aria-valuetext',fmtT(t)+' of '+fmtT(lesson.dur));
