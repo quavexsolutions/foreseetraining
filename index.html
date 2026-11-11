@@ -657,6 +657,9 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 .note-body p{margin:0 0 10px}
 .note-body ul{margin:0 0 10px;padding-left:18px}
 .note-body li{margin-bottom:4px}
+/* while a pop-up is open, scrolling moves only the pop-up, never the page behind it */
+html:has(#overlay .modal-bg),html:has(#overlay .modal-bg) body{overflow:hidden}
+.modal-bg,.modal{overscroll-behavior:contain}
 .modal.hw{width:min(660px,100%);border-radius:22px;background:var(--bg)}
 .hw-hd{position:relative;padding:26px 64px 24px 28px;background:linear-gradient(120deg,#0D2142 10%,#0F4F63 60%,#0A7E7B);color:#fff}
 .hw-hd small{display:block;font-weight:800;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;opacity:.85;margin-bottom:6px}
