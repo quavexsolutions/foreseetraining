@@ -657,12 +657,28 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 .note-body p{margin:0 0 10px}
 .note-body ul{margin:0 0 10px;padding-left:18px}
 .note-body li{margin-bottom:4px}
-.how-part{margin:18px 0 10px;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--teal)}
-.how-part:first-child{margin-top:0}
-.how-steps{list-style:none;margin:0;padding:0;display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));counter-reset:none}
-.how-steps li{display:grid;gap:4px;align-content:start;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);position:relative}
-.how-steps li span:last-child{font-size:.88rem;color:var(--muted);line-height:1.5}
-.how-n{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--teal);color:#fff;font-weight:800;font-size:.85rem;margin-bottom:4px}
+.modal.hw{width:min(660px,100%);border-radius:22px;background:var(--bg)}
+.hw-hd{position:relative;padding:26px 64px 24px 28px;background:linear-gradient(120deg,#0D2142 10%,#0F4F63 60%,#0A7E7B);color:#fff}
+.hw-hd small{display:block;font-weight:800;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;opacity:.85;margin-bottom:6px}
+.hw-hd h3{margin:0;font-size:1.55rem;line-height:1.2;color:#fff}
+.hw-hd p{margin:6px 0 0;opacity:.88;font-size:.95rem}
+.hw-x{position:absolute;right:18px;top:18px;width:36px;height:36px;border-radius:50%;border:0;background:rgba(255,255,255,.2);color:#fff;font-size:1.3rem;line-height:1;cursor:pointer}
+.hw-x:hover{background:rgba(255,255,255,.32)}
+.hw-tl{list-style:none;margin:0;padding:22px 26px 6px;position:relative}
+.hw-tl::before{content:"";position:absolute;left:51px;top:40px;bottom:46px;width:3px;border-radius:3px;background:linear-gradient(var(--teal),var(--teal-bright))}
+.hw-tl li{display:grid;grid-template-columns:52px 1fr;gap:14px;padding-bottom:14px;position:relative}
+.hw-tl li.hw-part{display:block;padding:4px 0 12px 66px}
+.hw-tl li.hw-part span{display:inline-block;font-weight:800;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);background:var(--soft);padding:6px 10px;border-radius:999px}
+.hw-node{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:var(--surface);border:2px solid var(--line);box-shadow:0 6px 16px rgba(13,33,66,.10);position:relative;z-index:1}
+.hw-node svg{width:24px;height:24px;fill:none;stroke:var(--teal);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.hw-node.first{background:var(--teal);border-color:var(--teal)}.hw-node.first svg{stroke:#fff}
+.hw-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 16px}
+.hw-num{display:block;font-weight:800;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--teal)}
+.hw-t{display:block;font-size:1.05rem;margin:3px 0 4px;color:var(--ink)}
+.hw-d{display:block;font-size:.92rem;line-height:1.55;color:var(--muted)}
+.hw-d b{color:var(--ink)}
+.hw-ft{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 26px 22px;position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 35%)}
+@media (max-width:520px){.hw-hd{padding:22px 58px 20px 20px}.hw-hd h3{font-size:1.3rem}.hw-tl{padding:18px 16px 4px}.hw-tl::before{left:39px}.hw-tl li{grid-template-columns:44px 1fr;gap:10px}.hw-tl li.hw-part{padding-left:54px}.hw-node{width:44px;height:44px;border-radius:14px}.hw-ft{padding:10px 16px 18px}.hw-ft .small{display:none}}
 .auth-alt{display:grid;gap:10px;padding-top:14px;border-top:1px solid var(--line);font-size:.9rem;color:var(--muted)}
 .auth-alt p{margin:0;line-height:1.5}
 .auth-alt .btn-link{display:inline;padding:0;margin-left:2px;vertical-align:baseline;line-height:inherit}
@@ -2791,11 +2807,33 @@ const HOWTO={
    ['Pause and read','At key points the video stops. Open the note, read it, then press <b>Resume</b>.'],
    ['Try the quiz','When you have watched every lesson, a short optional quiz helps you check what you remember.'],
    ['Come back any time','You can rewatch any lesson whenever you need it, for as long as your school’s licence runs.']]]]}};
+const HOW_IC={user:'<path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+ users:'<path d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.3a3.5 3.5 0 0 1 0 6.4M18 20a6.5 6.5 0 0 0-3-5.5"/>',
+ link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+ key:'<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3"/>',
+ play:'<circle cx="12" cy="12" r="9"/><path d="M10 8.5l6 3.5-6 3.5z"/>',
+ note:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/>',
+ check:'<circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.6 2.6L16 9.5"/>',
+ test:'<path d="M9 3h6l1 2h3v16H5V5h3z"/><path d="M9 11h6M9 15h4"/>',
+ cert:'<circle cx="12" cy="9" r="5"/><path d="M9 13.5L7.5 21l4.5-2.5 4.5 2.5L15 13.5"/>',
+ chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+ down:'<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
+ plan:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+ quiz:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.5V14M12 17.5v.01"/>',
+ back:'<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/>'};
+const HOW_ICON_FOR={'Add your staff':'users','Invite parents and carers':'link','Sign in':'key','Watch the lessons':'play','Complete each lesson':'check','Take the assessment':'test','Get the certificate':'cert','See progress':'chart','Download certificates':'down','Plans, places and reports':'plan',
+ 'Start your training':'user','Watch each lesson':'play','Pause and read':'note','Finish every lesson':'check','Get your certificate':'cert','Watch the lessons ':'play','Try the quiz':'quiz','Come back any time':'back'};
+const HOW_SUB={school:'Everything from adding people to collecting certificates',staff:'From your first lesson to your certificate',parent:'Short videos you can watch at your own pace'};
 function howModal(){
  const k=S.session.role==='school'?'school':S.course&&S.course.licence?'parent':'staff',h=HOWTO[k];let n=0;
- const m=modal(h.t,h.parts.map(p=>`<h4 class="how-part">${p[0]}</h4><ol class="how-steps">${p[1].map(x=>`<li><span class="how-n" aria-hidden="true">${++n}</span><b>${x[0]}</b><span>${x[1]}</span></li>`).join('')}</ol>`).join('')+`<div class="row" style="justify-content:flex-end;margin-top:18px"><button class="btn btn-primary" id="how-ok">Got it</button></div>`,{wide:true});
- $('#how-ok',m).onclick=closeModal;
- setTimeout(()=>{const b=m.querySelector('.m-body');if(b)b.scrollTop=0;m.scrollTop=0;$('#how-ok',m).focus({preventScroll:true})},60);
+ const total=h.parts.reduce((a,p)=>a+p[1].length,0);
+ const ico=t=>`<svg viewBox="0 0 24 24" aria-hidden="true">${HOW_IC[HOW_ICON_FOR[t]||'check']}</svg>`;
+ const body=h.parts.map(p=>`${h.parts.length>1?`<li class="hw-part"><span>${p[0]}</span></li>`:''}${p[1].map(x=>`<li><span class="hw-node${n===0?' first':''}">${ico(x[0])}</span><div class="hw-card"><span class="hw-num">Step ${++n}</span><b class="hw-t">${x[0]}</b><span class="hw-d">${x[1]}</span></div></li>`).join('')}`).join('');
+ const m=modal(h.t,'',{wide:true});
+ m.classList.add('hw');
+ m.innerHTML=`<div class="hw-hd"><small>${total} simple steps</small><h3>${h.t}</h3><p>${HOW_SUB[k]}</p><button class="hw-x" data-close aria-label="Close">×</button></div><ol class="hw-tl">${body}</ol><div class="hw-ft"><span class="small muted">Open this guide any time from the top menu.</span><button class="btn btn-primary" id="how-ok">Got it</button></div>`;
+ m.querySelector('.hw-x').onclick=closeModal;$('#how-ok',m).onclick=closeModal;
+ setTimeout(()=>{m.scrollTop=0;$('#how-ok',m).focus({preventScroll:true})},60);
 }
 function schoolHead(title,sub,sw){return `<section class="wrap app-head stack" style="gap:6px">${sw?`<div style="align-self:flex-end;margin-bottom:-34px" class="cs-wrap">${courseSwitch()}</div>`:''}<p class="eyebrow">${esc(S.school.name)}${S.school.sample?' · sample data':''}</p><h1 style="font-size:clamp(1.6rem,3.2vw,2.2rem)">${title}</h1>${sub?`<p class="muted">${sub}</p>`:''}</section>`}
 VIEWS.school=()=>{if(!guard('school'))return false;
