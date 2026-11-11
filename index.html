@@ -657,15 +657,9 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 .note-body p{margin:0 0 10px}
 .note-body ul{margin:0 0 10px;padding-left:18px}
 .note-body li{margin-bottom:4px}
-.how-card{padding:0;overflow:hidden}
-.how-card>summary{list-style:none;display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer}
-.how-card>summary::-webkit-details-marker{display:none}
-.how-card>summary:focus-visible{outline:3px solid var(--teal);outline-offset:-3px}
-.how-ic{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--soft);color:var(--soft-ink);font-weight:800}
-.how-h{display:grid;gap:2px;flex:1}
-.how-tg::after{content:"Show";color:var(--teal);font-weight:700}
-.how-card[open] .how-tg::after{content:"Hide"}
-.how-steps{list-style:none;margin:0;padding:4px 20px 20px;display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));counter-reset:none}
+.how-part{margin:18px 0 10px;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--teal)}
+.how-part:first-child{margin-top:0}
+.how-steps{list-style:none;margin:0;padding:0;display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));counter-reset:none}
 .how-steps li{display:grid;gap:4px;align-content:start;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);position:relative}
 .how-steps li span:last-child{font-size:.88rem;color:var(--muted);line-height:1.5}
 .how-n{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--teal);color:#fff;font-weight:800;font-size:.85rem;margin-bottom:4px}
@@ -1787,8 +1781,8 @@ function header(){
   const r=S.session.role;
   let nav='';
   const b=(v,l)=>`<button data-go="${v}" ${VIEW===v?'aria-current="page"':''}>${l}</button>`;
-  if(r==='school') nav=b('school','Dashboard')+b('attendees','Staff')+b('certs','Certificates')+b('courses','Buy training')+b('plan','Plan')+b('account','Account')+`<button data-act="logout">Sign out</button>`;
-  else if(r==='learner') nav=b('learner','My training')+`<button data-act="logout">Sign out</button>`;
+  if(r==='school') nav=b('school','Dashboard')+b('attendees','Staff')+b('certs','Certificates')+b('courses','Buy training')+b('plan','Plan')+b('account','Account')+`<button data-act="howto">How it works</button><button data-act="logout">Sign out</button>`;
+  else if(r==='learner') nav=b('learner','My training')+`<button data-act="howto">How it works</button><button data-act="logout">Sign out</button>`;
   else if(r==='admin') nav=b('admin','Administration')+b('home','Public site')+`<button data-act="logout">Sign out</button>`;
   else nav=b('home','Home')+b('courses','Courses')+b('pricing','Pricing')+b('about','About us')+b('how','How it works')+b('contact','Contact')+b('login','Login')+`<button class="btn btn-primary btn-sm" data-go="register">Register your school</button>`;
   return `<header class="site-header"><div class="wrap"><button class="brand" data-go="${r==='school'?'school':r==='learner'?'learner':r==='admin'?'admin':'home'}" aria-label="Foresee Training home"><img class="brand-logo" src="media/brand/foresee-logo-white.png" alt="Foresee Training" width="155" height="52"></button><button class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="nav">Menu</button><nav class="nav" id="nav" aria-label="Main">${nav}</nav></div></header>`;
@@ -1830,6 +1824,7 @@ function render(){
 }
 function bindCommon(root){
   $$('[data-go]',root).forEach(el=>el.addEventListener('click',e=>{e.preventDefault();const p=el.dataset.p;go(el.dataset.go,p?{id:p}:{})}));
+  $$('[data-act="howto"]',root).forEach(el=>el.onclick=howModal);
   $$('[data-act="logout"]',root).forEach(el=>el.onclick=()=>{if(LIVE)return liveLogout();S.session={role:'public',user:null};save();toast('Signed out.');go('home')});
   const sw=$('#cid-sw',root);if(sw)sw.onchange=()=>{S.ui.cid=sw.value;CID=sw.value;save();if(VIEW==='basket')go('basket',{cid:sw.value,places:PARAMS.places});else render()};
   const mb=$('#menu-btn',root);if(mb)mb.onclick=()=>{const n=$('#nav');const o=n.classList.toggle('open');mb.setAttribute('aria-expanded',o)}
@@ -2768,39 +2763,46 @@ AFTER.order=()=>{$('#ord-inv').onclick=()=>invoiceModal(S.orders.find(x=>x.ref==
 function invoiceModal(o){modal('Invoice '+o.invoice,`<div class="stack"><div class="row between" style="align-items:flex-start"><div class="brand" style="color:var(--ink)"><img class="brand-logo" src="media/brand/foresee-logo.png" alt="Foresee Training" width="155" height="52"></div><div class="small" style="text-align:right"><b class="mono">${o.invoice}</b><br>${fmtD(o.at)}</div></div><p class="small"><b>Bill to:</b> ${esc(S.school.name)}, ${esc(S.school.address||'')}, ${esc(S.school.postcode||'')}${o.po?`<br>PO: ${esc(o.po)}`:''}</p><div class="table-wrap"><table><thead><tr><th>Item</th><th>Qty</th><th>Unit</th><th>Amount</th></tr></thead><tbody><tr><td>${esc(orderTitle(o))} ${o.sub?'(yearly subscription)':o.licence?'(school licence, 12 months)':'(training place)'}</td><td class="num">${o.licence||o.sub?1:o.places}</td><td class="num">${money(o.price)}</td><td class="num">${money(o.total)}</td></tr></tbody></table></div><dl class="kv"><dt>VAT</dt><dd>${esc(S.cfg.vat)}</dd><dt>Total</dt><dd class="num">${money(o.total)}</dd><dt>Status</dt><dd>${esc(o.status)}</dd></dl></div>`,{wide:true})}
 
 /* ---------- School dashboard ---------- */
-/* ---------- "How it works" guide on each dashboard: open the first time, then remembers if you closed it ---------- */
-const HOW={
- school:{t:'How it works for your school',s:'From buying places to certificates, in five steps.',steps:[
-  ['Choose your training','Use Buy training for places on a course, or Plan for a yearly plan. Pay by card, or ask for an invoice with your purchase order number.'],
-  ['Add your staff','Go to Staff and add people one at a time or upload a CSV file. Each person gets their own invitation email.'],
-  ['Staff do the training','They set a password, watch each video lesson, pause to read the key notes, then take a 20-question assessment.'],
-  ['Track progress','This dashboard shows who has started, who has finished and who still needs a nudge.'],
-  ['Collect certificates','Anyone who scores '+S.cfg.passMark+'% or more gets a certificate straight away. Download them one at a time or all together as a ZIP file.']]},
- schoolp:{t:'How it works for parent courses',s:'Share one link and families sign themselves up.',steps:[
-  ['Buy the school licence','One licence a year covers any number of parents and carers.'],
-  ['Share your join link','Send the link or join code in a newsletter, by text or on the QR poster. It is printed below.'],
-  ['Parents sign up','They enter the code, create their own account and start straight away, on any device.'],
-  ['See the take-up','This page shows how many families have joined and finished.']]},
- staff:{t:'How your training works',s:'Five steps from your first lesson to your certificate.',steps:[
-  ['Watch each lesson','Lessons play in order and your place is saved, so you can stop at any time. You can rewind, but not skip ahead.'],
-  ['Pause and read','At each key point the video stops. Open the note, read it, then press Resume.'],
-  ['Finish every lesson','Watch at least '+S.cfg.completionPct+'% of each video and open its key notes to complete it.'],
-  ['Take the assessment','When all lessons are done, answer 20 questions. Lessons are locked while your test is open. You need '+S.cfg.passMark+'% to pass, and you can try again.'],
-  ['Get your certificate','It is created as soon as you pass. Download it here; your school can see it too.']]},
- parent:{t:'How this course works',s:'Short videos you can watch at your own pace.',steps:[
-  ['Watch the lessons','Start with the first lesson. Your place is saved, so you can stop and come back on any device.'],
-  ['Pause and read','At key points the video stops. Open the note, read it, then press Resume.'],
-  ['Try the quiz','When you have watched every lesson, a short optional quiz helps you check what you remember.'],
-  ['Come back any time','You can rewatch any lesson whenever you need it, for as long as your school’s licence runs.']]}};
-function howCard(k){const h=HOW[k];if(!h)return'';let shut=false;try{shut=localStorage.getItem('ft_how_'+k)==='closed'}catch(e){}
- return `<details class="how-card card" data-how="${k}"${shut?'':' open'}><summary><span class="how-ic" aria-hidden="true">?</span><span class="how-h"><b>${h.t}</b><span class="small muted">${h.s}</span></span><span class="how-tg small" aria-hidden="true"></span></summary><ol class="how-steps">${h.steps.map((x,i)=>`<li><span class="how-n" aria-hidden="true">${i+1}</span><b>${x[0]}</b><span>${x[1]}</span></li>`).join('')}</ol></details>`}
-document.addEventListener('toggle',e=>{const d=e.target;if(d&&d.matches&&d.matches('details.how-card')){try{localStorage.setItem('ft_how_'+d.dataset.how,d.open?'open':'closed')}catch(err){}}},true);
+/* ---------- "How it works" guide: a button in the signed-in menu opens it ---------- */
+const HOWTO={
+ school:{t:'How Foresee Training works',parts:[
+  ['Getting your people started',[
+   ['Add your staff','Go to <b>Staff</b> and press <b>Add staff</b>. Add people one at a time or upload a CSV file. Each person gets their own invitation email.'],
+   ['Invite parents and carers','Choose the parent course on your <b>Dashboard</b> to get your join link, join code and QR poster. Share them with families, and they sign themselves up.']]],
+  ['What staff and parents do',[
+   ['Sign in','Staff open their invitation email, set a password and go to <b>My training</b>. Parents enter the join code and create their own account.'],
+   ['Watch the lessons','Short video lessons play in order. At each key point the video pauses: they open the note, read it, then press Resume. They can rewind, but not skip ahead.'],
+   ['Complete each lesson','A lesson counts as done once they have watched at least '+S.cfg.completionPct+'% of it and opened its key notes. Their place is saved, so they can stop at any time.'],
+   ['Take the assessment','When every lesson is done, staff answer 20 questions, with the lessons locked until they finish. '+S.cfg.passMark+'% is a pass, and they can try again. Parent courses have a short optional quiz instead.'],
+   ['Get the certificate','A certificate is created the moment someone passes. They can download it from <b>My training</b>, and it appears on your dashboard too.']]],
+  ['Your dashboard',[
+   ['See progress','<b>Dashboard</b> shows how many people have started, finished and passed each course. <b>Staff</b> shows each person’s status, so you can see who needs a nudge.'],
+   ['Download certificates','Go to <b>Certificates</b> to download them one at a time or all together as a ZIP file. Anyone can check a certificate is genuine with <b>Check a certificate</b> at the bottom of the website.'],
+   ['Plans, places and reports','Use <b>Buy training</b> or <b>Plan</b> for more courses or places, and <b>Account</b> for your school details. Your <b>Dashboard</b> can download a staff enrolment report, and shows when each person’s yearly safeguarding update is due.']]]]},
+ staff:{t:'How your training works',parts:[['From first lesson to certificate',[
+   ['Start your training','Go to <b>My training</b> and press <b>Start training</b>. If your school enrolled you on more than one course, choose the course at the top.'],
+   ['Watch each lesson','Lessons play in order. Your place is saved, so you can stop and come back on any device. You can rewind, but not skip ahead.'],
+   ['Pause and read','At each key point the video stops. Open the note, read it, then press <b>Resume</b>.'],
+   ['Finish every lesson','Watch at least '+S.cfg.completionPct+'% of each video and open its key notes. The next lesson unlocks when you finish one.'],
+   ['Take the assessment','When all lessons are done, answer 20 questions. The lessons are locked while your test is open. You need '+S.cfg.passMark+'% to pass, and you can try again.'],
+   ['Get your certificate','It is created as soon as you pass. Download it from <b>My training</b>; your school can see it too.']]]]},
+ parent:{t:'How this course works',parts:[['Short videos at your own pace',[
+   ['Watch the lessons','Start with the first lesson. Your place is saved, so you can stop and come back on any device.'],
+   ['Pause and read','At key points the video stops. Open the note, read it, then press <b>Resume</b>.'],
+   ['Try the quiz','When you have watched every lesson, a short optional quiz helps you check what you remember.'],
+   ['Come back any time','You can rewatch any lesson whenever you need it, for as long as your school’s licence runs.']]]]}};
+function howModal(){
+ const k=S.session.role==='school'?'school':S.course&&S.course.licence?'parent':'staff',h=HOWTO[k];let n=0;
+ const m=modal(h.t,h.parts.map(p=>`<h4 class="how-part">${p[0]}</h4><ol class="how-steps">${p[1].map(x=>`<li><span class="how-n" aria-hidden="true">${++n}</span><b>${x[0]}</b><span>${x[1]}</span></li>`).join('')}</ol>`).join('')+`<div class="row" style="justify-content:flex-end;margin-top:18px"><button class="btn btn-primary" id="how-ok">Got it</button></div>`,{wide:true});
+ $('#how-ok',m).onclick=closeModal;
+ setTimeout(()=>{const b=m.querySelector('.m-body');if(b)b.scrollTop=0;m.scrollTop=0;$('#how-ok',m).focus({preventScroll:true})},60);
+}
 function schoolHead(title,sub,sw){return `<section class="wrap app-head stack" style="gap:6px">${sw?`<div style="align-self:flex-end;margin-bottom:-34px" class="cs-wrap">${courseSwitch()}</div>`:''}<p class="eyebrow">${esc(S.school.name)}${S.school.sample?' · sample data':''}</p><h1 style="font-size:clamp(1.6rem,3.2vw,2.2rem)">${title}</h1>${sub?`<p class="muted">${sub}</p>`:''}</section>`}
 VIEWS.school=()=>{if(!guard('school'))return false;
-  if(S.course.licence)return schoolHead('Training dashboard',`Signed in as ${esc(S.school.contacts[0].name)}, ${esc(S.school.contacts[0].role)}`)+`<section class="wrap" style="padding-top:4px">${howCard(S.course.licence?'schoolp':'school')}</section>`+coursesStrip()+parentPanel();
+  if(S.course.licence)return schoolHead('Training dashboard',`Signed in as ${esc(S.school.contacts[0].name)}, ${esc(S.school.contacts[0].role)}`)+coursesStrip()+parentPanel();
   const A=enrolled(),st=A.map(statusOf);const started=st.filter(s=>s.prog!=='Not started').length,completed=st.filter(s=>s.prog==='Completed').length,certs=A.filter(a=>a.cert&&a.cert.status==='Valid').length;
   const pend=S.orders.filter(o=>o.status!=='Paid');
-  return schoolHead('Training dashboard',`Signed in as ${esc(S.school.contacts[0].name)}, ${esc(S.school.contacts[0].role)}`)+`<section class="wrap" style="padding-top:4px">${howCard(S.course.licence?'schoolp':'school')}</section>`+`
+  return schoolHead('Training dashboard',`Signed in as ${esc(S.school.contacts[0].name)}, ${esc(S.school.contacts[0].role)}`)+`
 ${coursesStrip()}
 
 <section class="wrap section-tight stack" style="gap:24px;padding-top:16px">
@@ -3046,7 +3048,6 @@ VIEWS.learner=()=>{if(!guard('learner'))return false;const a=learner();if(!a){S.
   return `<section class="wrap app-head stack" style="gap:6px"><p class="eyebrow">${esc(S.school.name)}</p><h1 style="font-size:clamp(1.6rem,3.2vw,2.2rem)">Welcome, ${esc(a.name.split(' ')[0])}</h1><p class="muted">${esc(S.school.name)} has enrolled you on ${mine.length>1?'these courses':'this course'}. Your progress saves automatically.</p>${mine.length>1?`<div class="row" aria-label="Your courses" style="margin-top:10px">${mine.map(x=>`<button class="btn ${x.id===a.id?'btn-primary':'btn-ghost'} btn-sm" data-switch="${x.id}" aria-pressed="${x.id===a.id}">${esc(S.courses[x.course].title)}${x.cert?' ✓':''}</button>`).join('')}</div>`:''}</section>
 <section class="wrap section-tight stack" style="gap:24px;padding-top:16px"><div class="split">
  <div class="stack" style="gap:20px">
-  ${howCard(lic?'parent':'staff')}
   ${lic?confCard(a):''}
   <div class="card raised stack" style="gap:14px"><div class="row between"><h2 style="font-size:1.35rem">${esc(S.course.title)}</h2><span class="pill teal">v${esc(S.course.version)}</span></div><p class="muted">${esc(S.course.short)}</p><div class="row between small"><span>${st.done} of ${st.total} lessons complete</span><b class="num">${st.pct}%</b></div><div class="bar"><i style="width:${st.pct}%"></i></div>
    <div class="row">${passed(a)?`<button class="btn btn-primary" data-cert="${a.id}">View your certificate</button>${lic?`<button class="btn btn-ghost" id="ld-quiz">${a.quiz?'Take the quiz again':'Try the optional quiz'}</button>`:''}`:allDone?`<button class="btn btn-primary" id="ld-assess">${testOpen()?'Continue your test':a.attempts.length?'Retake the assessment':'Start the assessment'}</button>`:`<button class="btn btn-primary" data-lesson="${nextIdx}">${Object.keys(a.progress).length?'Continue training':'Start training'}</button>`}<span class="small muted">${esc(S.course.duration)}</span></div></div>
