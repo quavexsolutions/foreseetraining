@@ -367,9 +367,9 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 .scene .s-art::before{content:"";position:absolute;inset:-14%;border-radius:50%;border:1px dashed rgba(43,196,188,.35);animation:spin 26s linear infinite}
 @keyframes floaty{50%{transform:translateY(-6%)}}
 @keyframes spin{to{transform:rotate(360deg)}}
-.scene.l-quote .s-qm{position:absolute;left:4.5%;top:2%;font-size:22cqw;line-height:1;font-weight:900;color:rgba(43,196,188,.12);font-family:Georgia,serif;pointer-events:none;animation:rise .8s both}
-.scene.l-quote .s-title{position:relative;width:fit-content;background:linear-gradient(transparent 62%,rgba(43,196,188,.28) 62%) no-repeat 0 0/0 100%;animation:rise .6s both,hl 1.2s .7s ease-out forwards;-webkit-box-decoration-break:clone;box-decoration-break:clone}
-@keyframes hl{to{background-size:100% 100%}}
+/* quote base resets */
+.scene.l-quote .s-qm{display:none}
+.scene.l-quote .s-title{background:none!important;animation:none!important}
 .scene.no-ring .s-stat{font-size:11cqw}
 .scene ul.has-ic li.on .ic.li-ic{animation:pop .5s cubic-bezier(.3,1.6,.5,1) both}
 @keyframes pop{0%{transform:scale(.4) rotate(-12deg)}100%{transform:none}}
@@ -455,17 +455,16 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 .end-btn-pri:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(43,196,188,.5)}
 .end-btn-sec{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.2)}
 .end-btn-sec:hover{background:rgba(255,255,255,.15)}
-/* Key principle quote card layout */
-.scene.l-quote{display:grid!important;grid-template-columns:auto 1fr!important;align-items:center!important;gap:3.5cqw!important;padding:6% 8%!important}
-.scene.l-quote .s-quote-emblem{position:relative;width:11cqw;height:11cqw;display:flex;align-items:center;justify-content:center;flex:none}
-.scene.l-quote .sq-halo{position:absolute;inset:-1.2cqw;border-radius:50%;background:radial-gradient(circle,rgba(43,196,188,.28),transparent 70%);animation:breathe 3.6s ease-in-out infinite}
-.scene.l-quote .sq-ring{position:absolute;inset:0;border-radius:50%;border:2px solid rgba(43,196,188,.45);box-shadow:0 0 25px rgba(43,196,188,.25);background:radial-gradient(circle at 35% 30%,#174E68,#0B253D)}
-.scene.l-quote .sq-ic{position:relative;z-index:2;width:5.4cqw;height:5.4cqw;color:var(--teal-bright)}
-.scene.l-quote .s-quote-content{display:flex;flex-direction:column;gap:1.3cqw;min-width:0}
-.scene.l-quote .s-title{font-size:max(16px,3.6cqw)!important;font-weight:800;color:#fff!important;line-height:1.25;margin:0;max-width:95%}
-.scene.l-quote ul{list-style:none;margin:0;padding:0}
-.scene.l-quote li{display:inline-flex;align-items:center;gap:1.1cqw;background:rgba(43,196,188,.12);border:1px solid rgba(43,196,188,.35);border-radius:999px;padding:.7cqw 1.6cqw;font-size:max(10px,1.7cqw);color:#E2F5F4;font-weight:600}
-.scene.l-quote li::before{content:"✓";color:var(--teal-bright);font-weight:900}
+/* Executive Key Principle Takeaway Card (Clean Masterclass Design) */
+.scene.l-quote{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;text-align:center!important;padding:5% 8%!important;position:absolute!important;inset:0!important;background:radial-gradient(70% 70% at 50% 50%,rgba(43,196,188,.09) 0%,transparent 75%)!important}
+.scene.l-quote .sq-card{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;max-width:88%;padding:3.2cqw 4.5cqw;background:rgba(255,255,255,.04);border:1px solid rgba(43,196,188,.24);border-radius:1.8cqw;box-shadow:0 14px 44px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.08);backdrop-filter:blur(10px);animation:sqRise .5s cubic-bezier(.16,1,.3,1) both}
+@keyframes sqRise{from{opacity:0;transform:translateY(1.4cqw) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.scene.l-quote .sq-kicker{display:inline-flex;align-items:center;gap:.7cqw;padding:.45cqw 1.3cqw;border-radius:999px;background:rgba(43,196,188,.12);border:1px solid rgba(43,196,188,.35);color:var(--teal-bright);font-family:var(--f-mono);font-size:max(9px,1.25cqw);font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:1.8cqw}
+.scene.l-quote .sq-dot{width:.55cqw;height:.55cqw;min-width:6px;min-height:6px;border-radius:50%;background:var(--teal-bright);box-shadow:0 0 8px var(--teal-bright)}
+.scene.l-quote .sq-quote{font-size:clamp(19px,3.8cqw,42px);font-weight:800;color:#fff;line-height:1.28;margin:0 0 1.8cqw;letter-spacing:-.015em;text-align:center;text-shadow:0 2px 14px rgba(0,0,0,.5);background:none!important}
+.scene.l-quote .sq-takeaway{display:inline-flex;align-items:center;gap:.9cqw;padding:.8cqw 1.8cqw;border-radius:.9cqw;background:rgba(43,196,188,.08);border:1px solid rgba(43,196,188,.24);border-left:3px solid var(--teal-bright);color:#E2F5F4;font-size:clamp(11px,1.7cqw,19px);font-weight:600;line-height:1.35;text-align:left}
+.scene.l-quote .sq-txt{color:#DCE5F0}
+.scene.l-quote .sq-txt b{color:#fff}
 /* quad: four cards, some open to explore */
 .scene .sa-quadw{display:flex;flex-direction:column;gap:1cqw}
 .scene .sa-tap{align-self:flex-end;font-family:var(--f-mono);font-size:max(9px,1.15cqw);letter-spacing:.06em;text-transform:uppercase;color:var(--teal-bright);animation:blink 2.4s ease-in-out infinite}
@@ -1912,7 +1911,7 @@ function sceneItems(s){
   if(!s.items)return '';
   return `<ul class="${s.icons?'has-ic':''}">${s.items.map((x,k)=>`<li>${s.icons&&s.icons[k]?ic(s.icons[k],'li-ic'):''}${x.replace(/<b>(.*?)<\/b>/,'<b>$1</b><span>')+(x.includes('<b>')?'</span>':'')}</li>`).join('')}</ul>`}
 function mountPlayer(host,lesson,opts){
-  opts=Object.assign({compact:false,restrictSeek:true,noteStops:true,saved:null,onSave:null,onNote:null,onEnd:null,onTick:null},opts);
+  opts=Object.assign({compact:false,restrictSeek:true,noteStops:true,saved:null,onSave:null,onNote:null,onEnd:null,onTick:null,onPrev:null},opts);
   const sv=opts.saved||{};
   let t=Math.min(sv.pos||0,lesson.dur), playing=false, speed=1, ccOn=true, narr=false, vol=.8, last=0, raf=0, sceneIdx=-1, capIdx=-1, popNote=null, pauseOnNote=false, saveTick=0;
   const w=(sv.w||'').split('');
@@ -2015,8 +2014,7 @@ function mountPlayer(host,lesson,opts){
     scEl.className='scene l-'+s.layout+(s.cls?' '+s.cls:'')+(ph?' has-photo':'')+(s.art?' art-'+s.art+(SA_SIDE[s.art]?' art-side':''):'')+(s.layout==='stat'&&!s.art&&!s.pct?' no-ring':'');
     scEl.style.animation='none';void scEl.offsetHeight;scEl.style.animation='';
     if(s.layout==='quote'){
-      const qIc=s.icon||(s.title.match(/online|phone|screen|cyber/i)?'devices':s.title.match(/listen|disclos|tell|speak/i)?'chat':s.title.match(/record|write|report/i)?'doc':s.title.match(/curious|care|heart|need/i)?'heart':s.title.match(/staff|team|adult|alone/i)?'users':'shield');
-      scEl.innerHTML=`<div class="s-quote-emblem" aria-hidden="true"><div class="sq-halo"></div><div class="sq-ring"></div><div class="sq-ic">${ic(qIc)}</div></div><div class="s-quote-content"><div class="s-kicker">${esc(s.kicker||'Key principle')}</div><div class="s-title">${esc(s.title)}</div>${s.items?`<ul>${s.items.map(it=>`<li><span>${it}</span></li>`).join('')}</ul>`:''}</div><div class="sn" aria-hidden="true">${String(i+1).padStart(2,'0')} / ${String(lesson.scenes.length).padStart(2,'0')}</div>`;
+      scEl.innerHTML=`<div class="sq-card"><div class="sq-kicker"><span class="sq-dot"></span><span>${esc(s.kicker||'Key principle')}</span></div><h2 class="sq-quote">“${esc(s.title.replace(/^[“”"']+|[“”"']+$/g,''))}”</h2>${s.items&&s.items.length?`<div class="sq-takeaway"><span class="sq-txt">${s.items[0]}</span></div>`:''}</div><div class="sn" aria-hidden="true">${String(i+1).padStart(2,'0')} / ${String(lesson.scenes.length).padStart(2,'0')}</div>`;
     } else {
       scEl.innerHTML=`${ph?`<div class="s-photo" style="background-image:url('${ph}')" role="img" aria-label="${esc(s.title)}"></div>`:''}<div class="s-kicker">${esc(s.kicker)}</div>${s.stat?`<div class="s-stat">${esc(s.stat)}</div>`:''}<div class="s-title">${esc(s.title)}</div>${s.text?`<p class="s-text">${esc(s.text)}</p>`:''}${s.src?`<div class="s-src">Source: ${esc(s.src)}</div>`:''}${s.art?sceneArt(s):sceneItems(s)}${s.layout==='title'&&!ph?`<div class="s-art" aria-hidden="true">${ic((S.course&&S.course.id)||'shield')}</div>`:''}<div class="sn" aria-hidden="true">${String(i+1).padStart(2,'0')} / ${String(lesson.scenes.length).padStart(2,'0')}</div>${s.pct?`<div class="s-ring" style="--p:${+s.pct}%" aria-hidden="true"></div>`:''}`;
     }
@@ -2066,7 +2064,7 @@ function mountPlayer(host,lesson,opts){
     if(manual===true&&!opts.compact){}
   }
   function closePop(){slot.innerHTML='';if(popNote){popNote.remove();popNote=null}}
-  function showEndCard(){P.classList.add('is-ended');const ec=stage.querySelector('.stage-endcard');if(!ec)return;ec.hidden=false;ec.innerHTML=`<img src="media/brand/foresee-logo-white.png" alt="Foresee Training" class="end-logo"><div class="end-badge">${ic('check')}<span>Lesson Complete</span></div><h3 class="end-title">${esc(lesson.title)}</h3><p class="end-sub">Well done on finishing this lesson. All interactive notes and key takeaways recorded.</p><div class="end-actions"><button class="end-btn end-btn-pri" id="end-replay">↺ Replay lesson</button>${opts.onEnd?`<button class="end-btn end-btn-sec" id="end-next">Next lesson →</button>`:''}</div>`;const br=ec.querySelector('#end-replay');if(br)br.onclick=()=>{hideEndCard();seek(0);play()};const bn=ec.querySelector('#end-next');if(bn)bn.onclick=()=>{hideEndCard();opts.onEnd&&opts.onEnd(state())}}
+  function showEndCard(){P.classList.add('is-ended');const ec=stage.querySelector('.stage-endcard');if(!ec)return;ec.hidden=false;ec.innerHTML=`<img src="media/brand/foresee-logo-white.png" alt="Foresee Training" class="end-logo"><div class="end-badge">${ic('check')}<span>Lesson Complete</span></div><h3 class="end-title">${esc(lesson.title)}</h3><p class="end-sub">Well done on finishing this lesson. All interactive notes and key takeaways recorded.</p><div class="end-actions">${opts.onPrev?`<button class="end-btn end-btn-sec" id="end-prev">← Previous lesson</button>`:''}<button class="end-btn end-btn-pri" id="end-replay">↺ Replay lesson</button></div>`;const br=ec.querySelector('#end-replay');if(br)br.onclick=()=>{hideEndCard();seek(0);play()};const bp=ec.querySelector('#end-prev');if(bp)bp.onclick=()=>{hideEndCard();opts.onPrev&&opts.onPrev()}}
   function hideEndCard(){P.classList.remove('is-ended');const ec=stage.querySelector('.stage-endcard');if(ec){ec.hidden=true;ec.innerHTML=''}}
   function showMarker(n){
     if(slot.querySelector('.note-pop'))return;
@@ -2112,7 +2110,22 @@ function mountPlayer(host,lesson,opts){
   /* Back and forward 10 seconds. Forward still stops at the furthest point watched, and never skips a note that hasn't been read. */
   $('.rw',P).onclick=()=>{if(stage.querySelector('.ask'))return;seek(t-10)};
   $('.fw',P).onclick=()=>{if(stage.querySelector('.ask'))return;const pn=pendingNote(t,Math.min(lesson.dur,t+10));seek(pn?Math.min(t+10,noteStopAt(pn)-0.1):t+10)};
-  stage.addEventListener('keydown',e=>{if(e.key===' '||e.key==='k'){e.preventDefault();playing?pause():play()}if(e.key==='ArrowRight')seek(t+5);if(e.key==='ArrowLeft')seek(t-5);if(e.key==='m'||e.key==='M')$('.nar',P).click()});
+  const onGlobalKey=e=>{
+    if(e.target&&e.target.closest&&e.target.closest('input,textarea,select,[contenteditable]'))return;
+    if(stage.querySelector('.ask:not(.nstop)'))return;
+    if(!host||!host.isConnected||!document.body.contains(P))return;
+    if(e.key===' '||e.code==='Space'||e.key==='k'||e.key==='K'){
+      e.preventDefault();e.stopPropagation();playing?pause():play();
+    }else if(e.key==='ArrowRight'){
+      e.preventDefault();seek(t+5);
+    }else if(e.key==='ArrowLeft'){
+      e.preventDefault();seek(t-5);
+    }else if(e.key==='m'||e.key==='M'){
+      const nb=$('.nar',P);if(nb)nb.click();
+    }
+  };
+  window.addEventListener('keydown',onGlobalKey,true);
+  stage.addEventListener('keydown',e=>{if(e.key===' '||e.key==='k'){e.preventDefault();playing?pause():play()}});
   stage.addEventListener('click',e=>{const m=e.target.closest('[data-more]');if(m){if(playing)pause();const o=m.classList.toggle('open');m.setAttribute('aria-expanded',o);return}if(e.target===stage||e.target.closest('.scene'))playing?pause():play()});
   stage.addEventListener('keydown',e=>{const m=e.target.closest&&e.target.closest('[data-more]');if(m&&(e.key==='Enter'||e.key===' ')){e.preventDefault();e.stopPropagation();if(playing)pause();const o=m.classList.toggle('open');m.setAttribute('aria-expanded',o)}},true);
   track.addEventListener('click',e=>{if(e.target.classList.contains('mk')){openNote(e.target.dataset.n,true);return}const r=track.getBoundingClientRect();seek((e.clientX-r.left)/r.width*lesson.dur)});
@@ -2135,7 +2148,7 @@ function mountPlayer(host,lesson,opts){
   $('.fs',P).onclick=()=>{try{if(document.fullscreenElement)document.exitFullscreen();else P.querySelector('.pl-main').requestFullscreen().catch(()=>toast('Full screen is not available here.'))}catch(e){toast('Full screen is not available here.')}};
   const pon=$('.pon',P);if(pon)pon.onchange=e=>{pauseOnNote=e.target.checked};
   renderScene(0);update();noteList();
-  return {play,pause,seek,openNote,state,get t(){return t},destroy(){pause();stopClip();if(music)music.pause();persist();closePop()},isPlaying:()=>playing};
+  return {play,pause,seek,openNote,state,get t(){return t},destroy(){window.removeEventListener('keydown',onGlobalKey,true);pause();stopClip();if(music)music.pause();persist();closePop()},isPlaying:()=>playing};
 }
 
 /* =================================================================
@@ -3155,7 +3168,7 @@ VIEWS.lesson=()=>{if(!guard('learner'))return false;if(testOpen())return `<secti
   <div class="stack" style="gap:14px">
    ${S.course.licence?'<div id="lp-checks"></div>':''}
    <div class="transcript" id="lp-trans" hidden></div>
-   <div class="row"><button class="btn btn-ghost" id="lp-prev" ${i===0?'disabled':''}>← Previous module</button></div>
+   <div class="row" style="gap:10px;flex-wrap:wrap"><button class="btn btn-ghost" id="lp-prev" ${i===0?'disabled':''}>← Previous module</button><button class="btn btn-ghost" id="lp-replay">↺ Replay session</button></div>
   </div>
   <div class="card stack" style="gap:12px"><h4>To complete this lesson</h4><div class="reqs" id="lp-reqs"></div><p class="small muted" id="lp-done-at"></p></div>
  </div>
@@ -3178,7 +3191,8 @@ AFTER.lesson=()=>{
     onSave:st=>{const p=ps();p.w=st.w;p.pos=st.pos;p.notes=st.notes;p.asks=st.asks;save();reqs();liveProgress(a,l.id)},
     onNote:(n,all)=>{const p=ps();p.notes=all;save();reqs();liveProgress(a,l.id,true)},
     onTick:(t,ci)=>{const tr=$('#lp-trans');if(!tr.hidden)$$('button',tr).forEach((b,k)=>b.classList.toggle('now',k===ci))},
-    onEnd:()=>{reqs()}});
+    onEnd:()=>{reqs()},
+    onPrev:i>0?()=>go('lesson',{i:i-1}):null});
   {const last=i===ls.length-1,nx=ls[i+1],lbl=last?(S.course.licence?'Back to my course':'Go to the assessment'):(S.course.licence?'Next lesson':'Next module');
    const pane=$('#lp .pl-notes');if(pane)pane.insertAdjacentHTML('beforeend',`<div class="nx-wrap"><button class="nx" id="lp-next" disabled><span class="nx-glow" aria-hidden="true"></span><span class="nx-txt"><span class="nx-k"><span class="nx-lock" aria-hidden="true">${ic('lock')}</span><span class="nx-on">Up next</span><span class="nx-off">Finish to unlock</span></span><span class="nx-t">${esc(last?lbl:lbl+' · '+nx.l.title)}</span></span><span class="nx-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></button></div>`);}
   // Check questions: instant feedback, try again if wrong; only the first try is counted (anonymously) for the school
@@ -3206,6 +3220,7 @@ AFTER.lesson=()=>{
     const ok=$('#tx-ok',m);if(ok){ok.onchange=()=>$('#tx-done').disabled=!ok.checked;$('#tx-done').onclick=()=>{const p=ps();p.notes=[...new Set([...p.notes,...l.notes.map(n=>n.id)])];p.textDone=true;save();liveProgress(a,l.id,true);closeModal();reqs();if(!p.done)toast('Thanks. Now answer the check questions to finish this lesson.')}}
   };
   $('#lp-prev').onclick=()=>go('lesson',{i:i-1});
+  const repBtn=$('#lp-replay');if(repBtn)repBtn.onclick=()=>{if(activePlayer){activePlayer.seek(0);activePlayer.play()}};
   $('#lp-next').onclick=()=>i===ls.length-1?go('learner'):go('lesson',{i:i+1});
 };
 
