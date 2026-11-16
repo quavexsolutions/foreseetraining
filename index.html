@@ -573,7 +573,7 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 @media (prefers-reduced-motion:reduce){.scene li{transition:none}.scene .s-art::after{animation:none}html{scroll-behavior:auto}}
 .cc{position:absolute;left:50%;bottom:5%;transform:translateX(-50%);max-width:86%;text-align:center;background:rgba(3,10,22,.82);color:#fff;font-size:max(11px,2cqw);line-height:1.4;padding:.6cqw 1.4cqw;border-radius:6px;pointer-events:none}
 .cc:empty{display:none}
-.big-play{flex:none;margin-left:auto;display:inline-flex;align-items:center;gap:9px;height:42px;padding:0 20px 0 15px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:linear-gradient(135deg,var(--teal-bright),#16A39C);color:#04232A;font:700 15px/1 inherit;letter-spacing:.01em;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.35),0 0 0 5px rgba(43,196,188,.14);transition:transform .2s ease,box-shadow .2s ease;animation:bpIn .35s ease}
+.big-play{display:none!important;flex:none;margin-left:auto;display:inline-flex;align-items:center;gap:9px;height:42px;padding:0 20px 0 15px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:linear-gradient(135deg,var(--teal-bright),#16A39C);color:#04232A;font:700 15px/1 inherit;letter-spacing:.01em;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.35),0 0 0 5px rgba(43,196,188,.14);transition:transform .2s ease,box-shadow .2s ease;animation:bpIn .35s ease}
 .big-play:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(0,0,0,.4),0 0 0 8px rgba(43,196,188,.2)}
 .big-play:focus-visible{outline:3px solid #fff;outline-offset:3px}
 .big-play svg{width:18px;height:18px;margin-left:2px}
@@ -1982,7 +1982,7 @@ function mountPlayer(host,lesson,opts){
      <div class="pop-slot"></div><div class="snd-flash" aria-hidden="true"></div><div class="sr" role="status" aria-live="polite"></div>
      <div class="stage-endcard" hidden aria-hidden="true"></div>
     </div>
-    <div class="cc-bar"><span class="cc-wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span><div class="cc" aria-hidden="true"></div><button class="big-play" aria-label="Play lesson">${I.play}<span class="bp-l">Play</span></button></div>
+    <div class="cc-bar"><span class="cc-wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span><div class="cc" aria-hidden="true"></div></div>
     <div class="controls">
      <span class="pp-grp"><button class="ctl skip rw" aria-label="Back 10 seconds" title="Back 10 seconds"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" stroke="none" d="M11.5 6.2v11.6c0 .8-.9 1.3-1.6.8L2.6 13c-.6-.4-.6-1.4 0-1.8l7.3-5.6c.7-.5 1.6 0 1.6.8Zm10 0v11.6c0 .8-.9 1.3-1.6.8L12.6 13c-.6-.4-.6-1.4 0-1.8l7.3-5.6c.7-.5 1.6 0 1.6.8Z"/></svg></button><button class="ctl pp" aria-label="Play">${I.play}</button><button class="ctl skip fw" aria-label="Forward 10 seconds" title="Forward 10 seconds"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" stroke="none" d="M12.5 6.2v11.6c0 .8.9 1.3 1.6.8l7.3-5.6c.6-.4.6-1.4 0-1.8l-7.3-5.6c-.7-.5-1.6 0-1.6.8Zm-10 0v11.6c0 .8.9 1.3 1.6.8l7.3-5.6c.6-.4.6-1.4 0-1.8L4.1 5.4c-.7-.5-1.6 0-1.6.8Z"/></svg></button></span>
      <span class="time"><span class="cur">00:00</span> / ${fmtT(lesson.dur)}</span>
@@ -2096,8 +2096,8 @@ function mountPlayer(host,lesson,opts){
     if(++saveTick%20===0)persist();
     if(t>=lesson.dur){pause();persist();showEndCard();opts.onEnd&&opts.onEnd(state())}
   }
-  function play(){if(stage.querySelector('.ask'))return;hideEndCard();if(t>=lesson.dur)t=0;playing=true;last=0;P.classList.add('is-playing');big.hidden=true;pp.innerHTML=I.pause;pp.setAttribute('aria-label','Pause');clearInterval(raf);raf=setInterval(loop,100);if(clips.length)playClip();else{const c=lesson.captions[capIdx];if(c)speak(c[1])}}
-  function pause(){stopCue();playing=false;P.classList.remove('is-playing');clearInterval(raf);stopClip();syncMusic();pp.innerHTML=I.play;pp.setAttribute('aria-label','Play');big.hidden=false;{const bl=big.querySelector('.bp-l');if(bl)bl.textContent=t>0.5?'Resume':'Play'}try{speechSynthesis.cancel()}catch(e){}}
+  function play(){if(stage.querySelector('.ask'))return;hideEndCard();if(t>=lesson.dur)t=0;playing=true;last=0;P.classList.add('is-playing');if(big)big.hidden=true;pp.innerHTML=I.pause;pp.setAttribute('aria-label','Pause');clearInterval(raf);raf=setInterval(loop,100);if(clips.length)playClip();else{const c=lesson.captions[capIdx];if(c)speak(c[1])}}
+  function pause(){stopCue();playing=false;P.classList.remove('is-playing');clearInterval(raf);stopClip();syncMusic();pp.innerHTML=I.play;pp.setAttribute('aria-label','Play');if(big){big.hidden=false;const bl=big.querySelector('.bp-l');if(bl)bl.textContent=t>0.5?'Resume':'Play'}try{speechSynthesis.cancel()}catch(e){}}
   function seek(to){
     hideEndCard();
     to=Math.max(0,Math.min(lesson.dur,to));
@@ -2106,7 +2106,7 @@ function mountPlayer(host,lesson,opts){
   }
   function state(){const ws=Array.from({length:lesson.dur+1},(_,i)=>w[i]==='1'?'1':'0').join('');return {w:ws,pos:Math.floor(t),notes:[...opened],asks:[...askDone],pct:watchedPct(ws,lesson.dur)}}
   function persist(){opts.onSave&&opts.onSave(state())}
-  big.onclick=play;pp.onclick=()=>playing?pause():play();
+  if(big)big.onclick=play;pp.onclick=()=>playing?pause():play();
   /* Back and forward 10 seconds. Forward still stops at the furthest point watched, and never skips a note that hasn't been read. */
   $('.rw',P).onclick=()=>{if(stage.querySelector('.ask'))return;seek(t-10)};
   $('.fw',P).onclick=()=>{if(stage.querySelector('.ask'))return;const pn=pendingNote(t,Math.min(lesson.dur,t+10));seek(pn?Math.min(t+10,noteStopAt(pn)-0.1):t+10)};
@@ -3162,13 +3162,19 @@ AFTER.learner=()=>{
 
 VIEWS.lesson=()=>{if(!guard('learner'))return false;if(testOpen())return `<section class="wrap"><div class="auth-shell" style="max-width:560px"><div class="card raised stack" style="gap:14px"><span class="pill warn" style="align-self:flex-start">Final test in progress</span><h2>Lessons are locked during your test</h2><p class="muted">You’ve started the final test, so the lessons and their notes are closed until you submit it. This keeps the test fair for everyone.</p><button class="btn btn-primary" id="lk-test" style="align-self:flex-start">Go back to the test</button></div></div></section>`;const a=learner(),ls=allLessons(),i=PARAMS.i||0,{m,l}=ls[i];if(!canStart(a,i)){toast('Complete the previous module first.');return VIEWS.learner()}
   return `<section class="wrap app-head stack" style="gap:8px;padding-bottom:14px"><div class="crumbs"><button data-go="learner">My training</button><span>/</span><span>Module ${i+1}</span></div><h1 style="font-size:clamp(1.4rem,2.8vw,2rem)">${esc(m.title)}</h1><p class="muted small">${esc(l.title)} · <span class="mono">${fmtT(l.dur)}</span> · ${l.notes.length} interactive notes</p></section>
-<section class="wrap stack" style="gap:20px;padding-bottom:40px">
+<section class="wrap stack" style="gap:16px;padding-bottom:40px">
  <div id="lp"></div>
+ <div class="session-bar row between" style="align-items:center;padding:4px 0 12px;border-bottom:1px solid rgba(255,255,255,.08)">
+  <div class="row" style="gap:10px;flex-wrap:wrap">
+   <button class="btn btn-ghost btn-sm" id="lp-prev" ${i===0?'disabled':''}>← Previous module</button>
+   <button class="btn btn-ghost btn-sm" id="lp-replay">↺ Replay session</button>
+  </div>
+  <span class="mono small muted">Module ${i+1} of ${ls.length}</span>
+ </div>
  <div class="split">
   <div class="stack" style="gap:14px">
    ${S.course.licence?'<div id="lp-checks"></div>':''}
    <div class="transcript" id="lp-trans" hidden></div>
-   <div class="row" style="gap:10px;flex-wrap:wrap"><button class="btn btn-ghost" id="lp-prev" ${i===0?'disabled':''}>← Previous module</button><button class="btn btn-ghost" id="lp-replay">↺ Replay session</button></div>
   </div>
   <div class="card stack" style="gap:12px"><h4>To complete this lesson</h4><div class="reqs" id="lp-reqs"></div><p class="small muted" id="lp-done-at"></p></div>
  </div>
