@@ -1896,7 +1896,7 @@ function mountPlayer(host,lesson,opts){
     music.volume=Math.max(0,Math.min(1,vol*(talking?0.16:0.42)*tail));music.playbackRate=speed;
     if(music.paused){const pr=music.play();if(pr&&pr.catch)pr.catch(()=>{})}};
   const stopClip=()=>{if(clip){try{clip.pause()}catch(e){}clip=null}};
-  const segAt=x=>segs?segs.findIndex(s=>x>=s.t&&x<s.t+s.d-.05):-1;
+  const segAt=x=>segs?segs.findIndex(s=>x>=s.t&&x<=s.t+s.d+0.02):-1;
   const playClip=()=>{if(!narr||!clips.length)return;if(segs){const k=segAt(t);segIdx=k;if(k<0){stopClip();return}const a=clips[k];if(!a)return;if(clip===a&&!a.paused)return;stopClip();try{a.currentTime=Math.max(0,t-segs[k].t);a.volume=vol;a.playbackRate=speed;const pr=a.play();if(pr&&pr.catch)pr.catch(()=>{});clip=a}catch(e){}return}const c=lesson.captions[capIdx],a=clips[capIdx];if(!c||!a)return;const off=t-c[0];if(off<0||(a.duration&&off>=a.duration-.05))return;stopClip();try{a.currentTime=Math.max(0,off);a.volume=vol;a.playbackRate=speed;const pr=a.play();if(pr&&pr.catch)pr.catch(()=>{});clip=a}catch(e){}};
   const opened=new Set(sv.notes||[]);
   const askDone=new Set(sv.asks||[]);
@@ -1914,7 +1914,7 @@ function mountPlayer(host,lesson,opts){
   /* Pause and read. The video carries on to the end of the sentence being spoken, then stops. The narrator says
      "Now pause the video and read the interactive note: …" while the note glows in the list. The learner opens it,
      reads it, then resumes. Notes already opened don't stop the video again. */
-  const noteStopAt=n=>{const c=lesson.captions.find(c=>c[0]>=n.t-0.05);return c?c[0]:lesson.dur};
+  const noteStopAt=n=>{if(segs&&segs.length){const s=segs.find(s=>n.t>=s.t&&n.t<s.t+s.d+0.1)||segs.find(s=>s.t>=n.t);if(s)return s.t+s.d}const c=lesson.captions.find(c=>c[0]>=n.t-0.05);return c?c[0]:lesson.dur};
   const pendingNote=(from,to)=>opts.noteStops?lesson.notes.find(n=>{const at=noteStopAt(n);return !opened.has(n.id)&&from<at-0.06&&to>=at-0.06}):null;
   let cue=null;
   function stopCue(){if(cue){try{cue.pause()}catch(e){}cue=null}}
