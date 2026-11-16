@@ -323,10 +323,33 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 @keyframes statIn{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
 @keyframes ringIn{from{opacity:0;transform:translateY(-50%) rotate(-90deg)}to{opacity:.85;transform:translateY(-50%)}}
 @media (prefers-reduced-motion:reduce){.scene .s-stat,.scene .s-ring{animation:none}}
-.lsrc{border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;background:var(--surface)}
-.lsrc h4{margin:0 0 8px;font-size:.95rem}
-.lsrc ol{margin:0;padding-left:20px;display:grid;gap:6px;font-size:.88rem}
-.lsrc a{overflow-wrap:anywhere}
+/* Lesson Split: Equal 50/50 sizing and matching stretch height */
+.lesson-split{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:20px!important;align-items:stretch!important}
+@media (max-width:860px){.lesson-split{grid-template-columns:1fr!important}}
+.lesson-split .lp-col-left,.lesson-split .lp-col-right{height:100%!important;display:flex!important;flex-direction:column!important}
+.lesson-split .lsrc{flex:1!important;display:flex!important;flex-direction:column!important;justify-content:space-between!important;border:1px solid var(--line)!important;border-radius:14px!important;background:var(--surface)!important;padding:16px 18px!important;box-shadow:0 4px 18px rgba(10,26,51,.04)!important;box-sizing:border-box!important}
+.lesson-split .lp-summary-card{flex:1!important;display:flex!important;flex-direction:column!important;justify-content:space-between!important;border:1px solid var(--line)!important;border-radius:14px!important;background:var(--surface)!important;padding:16px 18px!important;box-shadow:0 4px 18px rgba(10,26,51,.04)!important;box-sizing:border-box!important}
+.badge-dot-teal{width:8px;height:8px;border-radius:50%;background:var(--teal-bright);box-shadow:0 0 8px rgba(43,196,188,.6);flex:none}
+/* Smart interactive sources list */
+.src-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;flex:1}
+.src-item{margin:0}
+.src-link{display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:6px;text-decoration:none;color:var(--ink);font-size:.82rem;line-height:1.3;transition:all .15s ease}
+.src-link:hover{background:rgba(43,196,188,.08);color:var(--teal)}
+.src-idx{flex:none;display:inline-grid;place-items:center;width:18px;height:18px;border-radius:4px;background:rgba(10,26,51,.05);font-family:var(--f-mono);font-size:.7rem;font-weight:700;color:var(--muted)}
+.src-link:hover .src-idx{background:var(--teal);color:#fff}
+.src-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.src-ext{flex:none;font-size:.75rem;opacity:.45;transition:transform .15s,opacity .15s}
+.src-link:hover .src-ext{opacity:1;transform:translate(2px,-2px);color:var(--teal)}
+.src-footer{font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:6px;padding-top:8px;border-top:1px solid var(--line);margin-top:4px}
+.src-footer svg{width:14px;height:14px}
+/* Smart creative buttons */
+.btn-smart-prev,.btn-smart-replay{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 11px;border-radius:7px;font-size:.78rem;font-weight:600;letter-spacing:.01em;cursor:pointer;border:1px solid rgba(10,26,51,.12);background:rgba(10,26,51,.03);color:var(--ink);transition:all .2s cubic-bezier(.16,1,.3,1);white-space:nowrap}
+.btn-smart-prev:hover:not(:disabled),.btn-smart-replay:hover:not(:disabled){background:rgba(43,196,188,.09);border-color:rgba(43,196,188,.45);color:var(--teal);transform:translateY(-1px);box-shadow:0 2px 8px rgba(43,196,188,.15)}
+.btn-smart-prev:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-smart-prev .s-arr{display:inline-block;transition:transform .2s ease}
+.btn-smart-prev:hover:not(:disabled) .s-arr{transform:translateX(-3px)}
+.btn-smart-replay .s-spin{display:inline-block;font-size:.9rem;line-height:1;transition:transform .35s ease}
+.btn-smart-replay:hover .s-spin{transform:rotate(-180deg)}
 .cc{max-width:80%}
 .scene ul.has-ic li::before{display:none}
 .scene .ic.li-ic{flex:none;width:1.65em;height:1.65em;border-radius:.5em;display:grid;place-items:center;background:rgba(43,196,188,.16);border:1px solid rgba(43,196,188,.42);color:var(--teal-bright);margin-top:-.2em}
@@ -3164,18 +3187,20 @@ VIEWS.lesson=()=>{if(!guard('learner'))return false;if(testOpen())return `<secti
   return `<section class="wrap app-head stack" style="gap:8px;padding-bottom:14px"><div class="crumbs"><button data-go="learner">My training</button><span>/</span><span>Module ${i+1}</span></div><h1 style="font-size:clamp(1.4rem,2.8vw,2rem)">${esc(m.title)}</h1><p class="muted small">${esc(l.title)} · <span class="mono">${fmtT(l.dur)}</span> · ${l.notes.length} interactive notes</p></section>
 <section class="wrap stack" style="gap:20px;padding-bottom:40px">
  <div id="lp"></div>
- <div class="split">
-  <div class="stack" style="gap:14px">
+ <div class="split lesson-split">
+  <div class="lp-col-left stack" style="gap:14px">
    ${S.course.licence?'<div id="lp-checks"></div>':''}
    <div class="transcript" id="lp-trans" hidden></div>
   </div>
-  <div class="card stack" style="gap:14px">
-   <div class="row between" style="align-items:center"><h4 style="margin:0">To complete this lesson</h4><span class="mono small muted">Module ${i+1} of ${ls.length}</span></div>
-   <div class="reqs" id="lp-reqs"></div>
-   <p class="small muted" id="lp-done-at" style="margin:0"></p>
-   <div class="row" style="gap:8px;padding-top:12px;border-top:1px solid var(--line);flex-wrap:wrap">
-    <button class="btn btn-ghost btn-sm" id="lp-prev" ${i===0?'disabled':''}>← Previous module</button>
-    <button class="btn btn-ghost btn-sm" id="lp-replay">↺ Replay session</button>
+  <div class="card stack lp-summary-card">
+   <div class="stack" style="gap:8px">
+    <div class="row between" style="align-items:center;padding-bottom:8px;border-bottom:1px solid var(--line)"><div class="row" style="gap:7px;align-items:center"><span class="badge-dot-teal"></span><h4 style="margin:0;font-size:.92rem;font-weight:700">To complete this lesson</h4></div><span class="mono small muted">Module ${i+1} of ${ls.length}</span></div>
+    <div class="reqs" id="lp-reqs" style="margin:0"></div>
+    <p class="small muted" id="lp-done-at" style="margin:0;min-height:1.2em"></p>
+   </div>
+   <div class="session-btn-row row" style="gap:8px;padding-top:10px;border-top:1px solid var(--line);align-items:center;flex-wrap:wrap">
+    <button class="btn-smart-prev" id="lp-prev" ${i===0?'disabled':''}><span class="s-arr" aria-hidden="true">←</span><span>Previous module</span></button>
+    <button class="btn-smart-replay" id="lp-replay"><span class="s-spin" aria-hidden="true">↺</span><span>Replay session</span></button>
    </div>
   </div>
  </div>
@@ -3232,7 +3257,7 @@ AFTER.lesson=()=>{
   $('#lp-next').onclick=()=>i===ls.length-1?go('learner'):go('lesson',{i:i+1});
 };
 
-function srcList(l){return `<div class="lsrc"><h4>Sources for this lesson</h4><ol>${l.sources.map(s=>`<li><a href="${esc(s[1])}" target="_blank" rel="noopener">${esc(s[0])}</a></li>`).join('')}</ol></div>`}
+function srcList(l){return `<div class="lsrc"><div class="row between" style="align-items:center;padding-bottom:8px;border-bottom:1px solid var(--line)"><div class="row" style="gap:7px;align-items:center"><span class="badge-dot-teal"></span><h4 style="margin:0;font-size:.92rem;font-weight:700">Sources for this lesson</h4></div><span class="mono small muted">${l.sources.length} sources</span></div><ul class="src-list">${l.sources.map((s,k)=>`<li class="src-item"><a href="${esc(s[1])}" target="_blank" rel="noopener" class="src-link"><span class="src-idx">${k+1}</span><span class="src-name">${esc(s[0])}</span><span class="src-ext" aria-hidden="true">↗</span></a></li>`).join('')}</ul><div class="src-footer"><span>${ic('doc')}</span><span>Statutory guidance & latest UK research</span></div></div>`}
 /* Optional quiz (licence courses): one question at a time with instant feedback, no pass mark */
 let QZ=null;
 function startQuiz(){QZ={i:0,score:0,sel:[],checked:false,ids:S.course.quizIds||S.questions.slice(0,10).map(q=>q.id)};go('quiz')}
