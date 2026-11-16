@@ -3162,21 +3162,22 @@ AFTER.learner=()=>{
 
 VIEWS.lesson=()=>{if(!guard('learner'))return false;if(testOpen())return `<section class="wrap"><div class="auth-shell" style="max-width:560px"><div class="card raised stack" style="gap:14px"><span class="pill warn" style="align-self:flex-start">Final test in progress</span><h2>Lessons are locked during your test</h2><p class="muted">You’ve started the final test, so the lessons and their notes are closed until you submit it. This keeps the test fair for everyone.</p><button class="btn btn-primary" id="lk-test" style="align-self:flex-start">Go back to the test</button></div></div></section>`;const a=learner(),ls=allLessons(),i=PARAMS.i||0,{m,l}=ls[i];if(!canStart(a,i)){toast('Complete the previous module first.');return VIEWS.learner()}
   return `<section class="wrap app-head stack" style="gap:8px;padding-bottom:14px"><div class="crumbs"><button data-go="learner">My training</button><span>/</span><span>Module ${i+1}</span></div><h1 style="font-size:clamp(1.4rem,2.8vw,2rem)">${esc(m.title)}</h1><p class="muted small">${esc(l.title)} · <span class="mono">${fmtT(l.dur)}</span> · ${l.notes.length} interactive notes</p></section>
-<section class="wrap stack" style="gap:16px;padding-bottom:40px">
+<section class="wrap stack" style="gap:20px;padding-bottom:40px">
  <div id="lp"></div>
- <div class="session-bar row between" style="align-items:center;padding:4px 0 12px;border-bottom:1px solid rgba(255,255,255,.08)">
-  <div class="row" style="gap:10px;flex-wrap:wrap">
-   <button class="btn btn-ghost btn-sm" id="lp-prev" ${i===0?'disabled':''}>← Previous module</button>
-   <button class="btn btn-ghost btn-sm" id="lp-replay">↺ Replay session</button>
-  </div>
-  <span class="mono small muted">Module ${i+1} of ${ls.length}</span>
- </div>
  <div class="split">
   <div class="stack" style="gap:14px">
    ${S.course.licence?'<div id="lp-checks"></div>':''}
    <div class="transcript" id="lp-trans" hidden></div>
   </div>
-  <div class="card stack" style="gap:12px"><h4>To complete this lesson</h4><div class="reqs" id="lp-reqs"></div><p class="small muted" id="lp-done-at"></p></div>
+  <div class="card stack" style="gap:14px">
+   <div class="row between" style="align-items:center"><h4 style="margin:0">To complete this lesson</h4><span class="mono small muted">Module ${i+1} of ${ls.length}</span></div>
+   <div class="reqs" id="lp-reqs"></div>
+   <p class="small muted" id="lp-done-at" style="margin:0"></p>
+   <div class="row" style="gap:8px;padding-top:12px;border-top:1px solid var(--line);flex-wrap:wrap">
+    <button class="btn btn-ghost btn-sm" id="lp-prev" ${i===0?'disabled':''}>← Previous module</button>
+    <button class="btn btn-ghost btn-sm" id="lp-replay">↺ Replay session</button>
+   </div>
+  </div>
  </div>
 </section>`};
 AFTER.lesson=()=>{
@@ -3200,7 +3201,8 @@ AFTER.lesson=()=>{
     onEnd:()=>{reqs()},
     onPrev:i>0?()=>go('lesson',{i:i-1}):null});
   {const last=i===ls.length-1,nx=ls[i+1],lbl=last?(S.course.licence?'Back to my course':'Go to the assessment'):(S.course.licence?'Next lesson':'Next module');
-   const pane=$('#lp .pl-notes');if(pane)pane.insertAdjacentHTML('beforeend',`<div class="nx-wrap"><button class="nx" id="lp-next" disabled><span class="nx-glow" aria-hidden="true"></span><span class="nx-txt"><span class="nx-k"><span class="nx-lock" aria-hidden="true">${ic('lock')}</span><span class="nx-on">Up next</span><span class="nx-off">Finish to unlock</span></span><span class="nx-t">${esc(last?lbl:lbl+' · '+nx.l.title)}</span></span><span class="nx-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></button></div>`);}
+   const nextMod=S.course.licence?`Lesson ${i+2}`:`Module ${i+2}`;
+   const pane=$('#lp .pl-notes');if(pane)pane.insertAdjacentHTML('beforeend',`<div class="nx-wrap"><button class="nx" id="lp-next" disabled><span class="nx-glow" aria-hidden="true"></span><span class="nx-txt"><span class="nx-k"><span class="nx-lock" aria-hidden="true">${ic('lock')}</span><span class="nx-on">Up next</span><span class="nx-off">Finish to unlock</span></span><span class="nx-t">${esc(last?lbl:`${nextMod} · ${nx.l.title}`)}</span></span><span class="nx-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></button></div>`);}
   // Check questions: instant feedback, try again if wrong; only the first try is counted (anonymously) for the school
   const CHK={};
   const drawChecks=()=>{const box=$('#lp-checks');if(!box||!chk.length)return;const p=ps();p.checks=p.checks||{};
