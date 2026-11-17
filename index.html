@@ -342,13 +342,33 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 .src-link:hover .src-ext{opacity:1;transform:translate(2px,-2px);color:var(--teal)}
 .src-footer{font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:6px;padding-top:8px;border-top:1px solid var(--line);margin-top:4px}
 .src-footer svg{width:14px;height:14px}
-/* Smart creative buttons */
-.btn-smart-prev,.btn-smart-replay{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 11px;border-radius:7px;font-size:.78rem;font-weight:600;letter-spacing:.01em;cursor:pointer;border:1px solid rgba(10,26,51,.12);background:rgba(10,26,51,.03);color:var(--ink);transition:all .2s cubic-bezier(.16,1,.3,1);white-space:nowrap}
-.btn-smart-prev:hover:not(:disabled),.btn-smart-replay:hover:not(:disabled){background:rgba(43,196,188,.09);border-color:rgba(43,196,188,.45);color:var(--teal);transform:translateY(-1px);box-shadow:0 2px 8px rgba(43,196,188,.15)}
-.btn-smart-prev:disabled{opacity:.4;cursor:not-allowed;transform:none}
-.btn-smart-prev .s-arr{display:inline-block;transition:transform .2s ease}
+/* Progress Cards inside To complete this lesson */
+.reqs{display:flex;flex-direction:column;gap:8px}
+.req-card{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(10,26,51,.025);border:1px solid rgba(10,26,51,.07);transition:all .2s ease}
+.req-card.is-complete{background:rgba(43,196,188,.06);border-color:rgba(43,196,188,.3)}
+.req-status-ic .ck{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;flex:none;font-size:.7rem;color:#fff;margin-top:2px}
+.req-status-ic .ck.on{background:var(--ok);border-color:var(--ok)}
+.req-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.req-title{font-size:.83rem;color:var(--ink);font-weight:700}
+.req-badge{font-size:.74rem;color:var(--muted);font-weight:600}
+.req-sub{font-size:.73rem;color:var(--muted);line-height:1.25}
+.req-card.is-complete .req-title{color:#0A5452}
+.req-bar-track{width:100%;height:4px;border-radius:2px;background:rgba(10,26,51,.08);overflow:hidden;margin-top:2px}
+.req-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--teal-bright),#1B9E96);transition:width .4s ease}
+
+/* Auto-save & compliance status box filling blank space */
+.lp-status-box{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:8px;background:rgba(10,26,51,.025);border:1px dashed var(--line);font-size:.77rem;color:var(--muted);line-height:1.35}
+.lp-status-box.is-done{background:rgba(43,196,188,.08);border-style:solid;border-color:rgba(43,196,188,.35);color:#0A5452;font-weight:600}
+.lp-status-box svg{width:15px;height:15px;flex:none;color:var(--teal)}
+
+/* Bigger, prominent, full-width smart buttons */
+.session-btn-row{display:flex!important;gap:10px!important;padding-top:12px!important;border-top:1px solid var(--line)!important;align-items:center!important;width:100%!important}
+.btn-smart-prev,.btn-smart-replay{flex:1 1 0!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;height:40px!important;padding:0 16px!important;border-radius:9px!important;font-size:.86rem!important;font-weight:600!important;letter-spacing:.01em!important;cursor:pointer!important;border:1px solid rgba(10,26,51,.14)!important;background:rgba(10,26,51,.035)!important;color:var(--ink)!important;transition:all .2s cubic-bezier(.16,1,.3,1)!important;white-space:nowrap!important;box-sizing:border-box!important}
+.btn-smart-prev:hover:not(:disabled),.btn-smart-replay:hover:not(:disabled){background:rgba(43,196,188,.1)!important;border-color:rgba(43,196,188,.5)!important;color:var(--teal)!important;transform:translateY(-1px)!important;box-shadow:0 3px 10px rgba(43,196,188,.18)!important}
+.btn-smart-prev:disabled{opacity:.35!important;cursor:not-allowed!important;transform:none!important}
+.btn-smart-prev .s-arr{display:inline-block;font-size:.95rem;transition:transform .2s ease}
 .btn-smart-prev:hover:not(:disabled) .s-arr{transform:translateX(-3px)}
-.btn-smart-replay .s-spin{display:inline-block;font-size:.9rem;line-height:1;transition:transform .35s ease}
+.btn-smart-replay .s-spin{display:inline-block;font-size:1.05rem;line-height:1;transition:transform .35s ease}
 .btn-smart-replay:hover .s-spin{transform:rotate(-180deg)}
 .cc{max-width:80%}
 .scene ul.has-ic li::before{display:none}
@@ -3193,12 +3213,12 @@ VIEWS.lesson=()=>{if(!guard('learner'))return false;if(testOpen())return `<secti
    <div class="transcript" id="lp-trans" hidden></div>
   </div>
   <div class="card stack lp-summary-card">
-   <div class="stack" style="gap:8px">
+   <div class="stack" style="gap:10px">
     <div class="row between" style="align-items:center;padding-bottom:8px;border-bottom:1px solid var(--line)"><div class="row" style="gap:7px;align-items:center"><span class="badge-dot-teal"></span><h4 style="margin:0;font-size:.92rem;font-weight:700">To complete this lesson</h4></div><span class="mono small muted">Module ${i+1} of ${ls.length}</span></div>
     <div class="reqs" id="lp-reqs" style="margin:0"></div>
-    <p class="small muted" id="lp-done-at" style="margin:0;min-height:1.2em"></p>
+    <div class="lp-status-box" id="lp-status-box"><span>${ic('lock')}</span><span id="lp-done-at">Progress saves automatically as you watch.</span></div>
    </div>
-   <div class="session-btn-row row" style="gap:8px;padding-top:10px;border-top:1px solid var(--line);align-items:center;flex-wrap:wrap">
+   <div class="session-btn-row row">
     <button class="btn-smart-prev" id="lp-prev" ${i===0?'disabled':''}><span class="s-arr" aria-hidden="true">←</span><span>Previous module</span></button>
     <button class="btn-smart-replay" id="lp-replay"><span class="s-spin" aria-hidden="true">↺</span><span>Replay session</span></button>
    </div>
@@ -3213,9 +3233,37 @@ AFTER.lesson=()=>{
   const chk=checksFor(S.course,l);
   const reqs=()=>{const p=ps();const pct=watchedPct(p.w,l.dur);const seen=ess.filter(id=>p.notes.includes(id)).length;
     const watchOk=pct>=S.cfg.completionPct||p.textDone||p.done,notesOk=seen===ess.length||p.done,nChk=chk.filter(id=>((p.checks||{})[id]||{}).done).length,chkOk=nChk===chk.length||p.done;
-    $('#lp-reqs').innerHTML=`<div><span class="ck ${watchOk?'on':''}">✓</span><span>Watch at least ${S.cfg.completionPct}% of the video <span class="mono small muted">(${p.textDone||p.via==='text'?'text version':pct+'%'})</span></span></div><div><span class="ck ${notesOk?'on':''}">✓</span><span>Open the ${ess.length} key notes <span class="mono small muted">(${seen}/${ess.length})</span></span></div>${chk.length?`<div><span class="ck ${chkOk?'on':''}">✓</span><span>Answer the ${chk.length} check questions <span class="mono small muted">(${nChk}/${chk.length})</span></span></div>`:''}`;
+    const wPct=p.textDone||p.via==='text'?100:Math.min(100,Math.round((pct/S.cfg.completionPct)*100));
+    const nPct=ess.length?Math.min(100,Math.round((seen/ess.length)*100)):100;
+    $('#lp-reqs').innerHTML=`
+      <div class="req-card ${watchOk?'is-complete':''}">
+        <div class="req-status-ic"><span class="ck ${watchOk?'on':''}">✓</span></div>
+        <div class="req-info">
+          <div class="row between"><b class="req-title">Watch the lesson</b><span class="req-badge mono">${p.textDone||p.via==='text'?'Text version':`${pct}% / ${S.cfg.completionPct}%`}</span></div>
+          <div class="req-bar-track"><div class="req-bar-fill" style="width:${wPct}%"></div></div>
+          <span class="req-sub">Continuous playback tracking with auto-resume.</span>
+        </div>
+      </div>
+      <div class="req-card ${notesOk?'is-complete':''}">
+        <div class="req-status-ic"><span class="ck ${notesOk?'on':''}">✓</span></div>
+        <div class="req-info">
+          <div class="row between"><b class="req-title">Interactive notes</b><span class="req-badge mono">${seen} of ${ess.length} opened</span></div>
+          <div class="req-bar-track"><div class="req-bar-fill" style="width:${nPct}%"></div></div>
+          <span class="req-sub">Open essential statutory terms highlighted on screen.</span>
+        </div>
+      </div>
+      ${chk.length?`
+      <div class="req-card ${chkOk?'is-complete':''}">
+        <div class="req-status-ic"><span class="ck ${chkOk?'on':''}">✓</span></div>
+        <div class="req-info">
+          <div class="row between"><b class="req-title">Knowledge checks</b><span class="req-badge mono">${nChk} of ${chk.length} answered</span></div>
+          <div class="req-bar-track"><div class="req-bar-fill" style="width:${Math.round(nChk/chk.length*100)}%"></div></div>
+          <span class="req-sub">Reinforce key safeguarding decision points.</span>
+        </div>
+      </div>`:''}`;
     if(!p.done&&watchOk&&notesOk&&chkOk){p.done=true;p.at=Date.now();p.via=p.textDone?'text':'video';save();liveProgress(a,l.id,true);toast(`${S.course.licence?'Lesson':'Module'} ${i+1} complete.`)}
-    $('#lp-done-at').textContent=p.done?`Completed ${fmtDT(p.at)}`:'Your place in the video is saved, so you can stop at any time.';
+    const stBox=$('#lp-status-box');if(stBox)stBox.className='lp-status-box '+(p.done?'is-done':'');
+    const da=$('#lp-done-at');if(da)da.textContent=p.done?`Completed ${fmtDT(p.at)} · Training record updated`:'Progress saves automatically as you watch.';
     $('#lp-next').disabled=!p.done;
   };
   const p0=ps();
