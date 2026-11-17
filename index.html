@@ -1693,11 +1693,12 @@ const SAMPLE_Q=[DEFAULT_QUESTIONS[8],DEFAULT_QUESTIONS[9],DEFAULT_QUESTIONS[11]]
 const FUTURE=[['Child Protection Awareness','A shorter refresher for staff who have completed core training.'],['Preventing and Recognising Bullying','Spotting, recording and responding to bullying, including online.'],['Understanding Professional Boundaries','Safer working practice and low-level concerns.'],['Understanding Child Neglect','Recognising the signs of neglect and how it builds over time.']];
 
 /* ---------- state ---------- */
-const KEY='awarefirst_proto_v11';
+const KEY='awarefirst_proto_v12';
 const LIVE=!!(window.FT&&window.FT.live);
 let S, CID='sgs';
 /* S.course, S.questions and S.cfg.price always point at the course in context (CID). */
 function bindGetters(){
+  if(S&&S.qbank) S.qbank.sgs = clone(DEFAULT_QUESTIONS);
   Object.defineProperty(S,'course',{get:()=>S.courses[CID],configurable:true,enumerable:false});
   Object.defineProperty(S,'questions',{get:()=>S.qbank[CID],configurable:true,enumerable:false});
   Object.defineProperty(S.cfg,'price',{get:()=>S.courses[CID].price,set:v=>{S.courses[CID].price=v},configurable:true,enumerable:false});
@@ -1708,7 +1709,7 @@ function fullWatch(dur){return '1'.repeat(dur+1)}
 function seed(){
   const now=Date.now();
   const course=clone(DEFAULT_COURSE);
-  const st={v:11,courses:{sgs:course,ost:clone(COURSE_OST),osp:clone(COURSE_OSP),pbs:clone(COURSE_PBS),pbp:clone(COURSE_PBP),upd:clone(COURSE_UPD)},qbank:{sgs:clone(DEFAULT_QUESTIONS),ost:clone(Q_OST),osp:clone(Q_OSP),pbs:clone(Q_PBS),pbp:clone(Q_PBP),upd:clone(Q_UPD)},ui:{cid:'sgs'},
+  const st={v:12,courses:{sgs:course,ost:clone(COURSE_OST),osp:clone(COURSE_OSP),pbs:clone(COURSE_PBS),pbp:clone(COURSE_PBP),upd:clone(COURSE_UPD)},qbank:{sgs:clone(DEFAULT_QUESTIONS),ost:clone(Q_OST),osp:clone(Q_OSP),pbs:clone(Q_PBS),pbp:clone(Q_PBP),upd:clone(Q_UPD)},ui:{cid:'sgs'},
     cfg:{planPrices:{essentials:{s:295,m:450,l:650},complete:{s:495,m:750,l:1050}},passMark:75,attempts:'unlimited',completionPct:90,sequential:true,textAlt:true,validityMonths:12,vat:'No VAT applicable',codeMinutes:10},
     certSeq:10021,orderSeq:4180,
     school:{id:'sch1',sample:true,name:'Riverside Primary School',address:'14 Mill Lane, Ashford',postcode:'TN23 1AA',phone:'01233 000000',
@@ -1776,7 +1777,7 @@ function seed(){
   bindGetters();
   return st;
 }
-function load(){if(LIVE){seed();liveReset();return}try{S=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){S=null} if(!S||S.v!==11) seed(); else bindGetters()}
+function load(){if(LIVE){seed();liveReset();return}try{S=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){S=null} if(!S||S.v!==12) seed(); else bindGetters()}
 function save(){if(LIVE){try{sessionStorage.setItem('ft_pending',JSON.stringify(S.pending||null))}catch(e){}return}try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 function audit(what,who){if(LIVE)return;S.audit.unshift({at:Date.now(),who:who||currentName(),what})}
 function currentName(){const u=S.session;if(u.role==='school')return (S.school.contacts[0]||{}).name||'School admin';if(u.role==='learner'){const a=learner();return a?a.name:'Learner'}if(u.role==='admin')return 'Platform admin';return 'Visitor'}
@@ -3461,23 +3462,41 @@ function submitAssessment(){
   });
 }
 VIEWS.result=()=>{if(!guard('learner'))return false;const a=learner();const att=a.attempts.find(x=>x.id===PARAMS.att)||a.attempts[a.attempts.length-1];if(!att)return VIEWS.learner();
-  const mods=[...new Set((att.wrong||[]).map(id=>S.questions.find(q=>q.id===id)).filter(Boolean).map(q=>q.m))];
   const qList = (att.qs && att.qs.length) ? att.qs.map(id => S.questions.find(q => q.id === id)).filter(Boolean) : (Object.keys(att.answers||{}).length ? Object.keys(att.answers).map(id => S.questions.find(q => q.id === id)).filter(Boolean) : S.questions.slice(0, att.total || 20));
+
+  // Determine true correctness based on question answer key
+  const wrongIds = [];
+  let calculatedScore = 0;
+  qList.forEach(q => {
+    const ansIndices = att.answers ? (att.answers[q.id] || []) : [];
+    const g = ansIndices.slice().sort().join();
+    const c = (q.ans || []).slice().sort().join();
+    if (g !== '' && g === c) calculatedScore++;
+    else wrongIds.push(q.id);
+  });
+  const finalScore = Math.max(att.score, calculatedScore);
+  const finalTotal = att.total || qList.length || 20;
+  const finalPct = Math.round((finalScore / finalTotal) * 100);
+  const isPassed = finalPct >= S.cfg.passMark;
+  if (isPassed && !a.cert) {
+    a.cert = {ref: 'FT' + (S.certSeq++), at: Date.now(), version: S.course.version, status: 'Valid'};
+  }
+  const mods = [...new Set(wrongIds.map(id => S.questions.find(q => q.id === id)).filter(Boolean).map(q => q.m))];
 
   return `<section class="wrap"><div class="auth-shell" style="max-width:760px"><div class="card raised stack" style="gap:20px;padding:28px 24px">
   <div class="row between" style="align-items:center">
-    <span class="pill ${att.pass?'ok':'warn'}" style="font-size:.84rem;font-weight:700;padding:4px 12px">${att.pass?'✓ Passed':'Not Yet Passed'}</span>
+    <span class="pill ${isPassed?'ok':'warn'}" style="font-size:.84rem;font-weight:700;padding:4px 12px">${isPassed?'✓ Passed':'Not Yet Passed'}</span>
     <span class="small muted">Submitted ${fmtDT(att.at)} · Attempt ${a.attempts.indexOf(att)+1}</span>
   </div>
   
   <div>
-    <h2 style="font-size:1.45rem;margin:0 0 6px">${att.pass?'Congratulations! You have successfully passed the assessment.':'You have not yet achieved the required pass mark.'}</h2>
-    <p class="muted" style="margin:0">${att.pass?'You have demonstrated the safeguarding knowledge required under KCSIE 2026. Your official certificate is ready.':'You scored '+att.pct+'%. You need '+S.cfg.passMark+'% ('+Math.ceil((att.total||20)*S.cfg.passMark/100)+' correct) to pass. Review the answers and suggested modules below and try again when you feel ready.'}</p>
+    <h2 style="font-size:1.45rem;margin:0 0 6px">${isPassed?'Congratulations! You have successfully passed the assessment.':'You have not yet achieved the required pass mark.'}</h2>
+    <p class="muted" style="margin:0">${isPassed?'You have demonstrated the safeguarding knowledge required under KCSIE 2026. Your official certificate is ready.':'You scored '+finalPct+'%. You need '+S.cfg.passMark+'% ('+Math.ceil(finalTotal*S.cfg.passMark/100)+' correct) to pass. Review the answers and suggested modules below and try again when you feel ready.'}</p>
   </div>
 
   <div class="grid g3" style="gap:12px">
-    ${stat('Score', att.score + ' / ' + (att.total||20))}
-    ${stat('Percentage', att.pct + '%')}
+    ${stat('Score', finalScore + ' / ' + finalTotal)}
+    ${stat('Percentage', finalPct + '%')}
     ${stat('Pass Mark', S.cfg.passMark + '%')}
   </div>
 
@@ -3522,7 +3541,10 @@ VIEWS.result=()=>{if(!guard('learner'))return false;const a=learner();const att=
     <div class="stack qa-list" style="gap:12px">
       ${qList.map((q, qi) => {
         const ansIndices = att.answers ? (att.answers[q.id] || []) : [];
-        const isWrong = (att.wrong || []).includes(q.id);
+        const g = ansIndices.slice().sort().join();
+        const c = (q.ans || []).slice().sort().join();
+        const isCorrect = (g !== '' && g === c);
+        const isWrong = !isCorrect;
         const userAnsText = ansIndices.length ? ansIndices.map(idx => q.opts[idx]).join('; ') : 'Not answered';
         const correctAnsText = (q.ans || []).map(idx => q.opts[idx]).join('; ');
         return `
@@ -3912,7 +3934,34 @@ async function liveSend(q){q.t=null;q.last=Date.now();const p=q.a.progress[q.lid
   catch(e){q.last=0;if(e.status!==404)toast('We couldn’t save your progress just now. We’ll try again.');q.t=setTimeout(()=>liveSend(q),20000)}}
 function liveFlush(){Object.values(LQ).forEach(q=>{if(q.t){clearTimeout(q.t);liveSend(q)}})}
 async function liveAssess(a){const id=ASM.id;
-  try{const r=await FT.call('learn',{action:'assess',attendee:a.id,answers:ASM.ans,attemptId:id});Object.assign(a,{attempts:r.attendee.attempts,cert:r.attendee.cert});clearASM(a.id);ASM=null;go('result',{att:id})}
+  try{
+    const r=await FT.call('learn',{action:'assess',attendee:a.id,answers:ASM.ans,attemptId:id});
+    Object.assign(a,{attempts:r.attendee.attempts,cert:r.attendee.cert});
+    // Client-side verification: Ensure grading matches current single-choice questions even if backend edge function is awaiting deployment
+    const att = a.attempts.find(x => x.id === id) || a.attempts[a.attempts.length - 1];
+    if (att && ASM && ASM.qs) {
+      const qs = ASM.qs.map(qid => S.questions.find(q => q.id === qid)).filter(Boolean);
+      let localScore = 0; const localWrong = [];
+      qs.forEach(q => {
+        const g = (ASM.ans[q.id] || []).slice().sort().join();
+        const c = q.ans.slice().sort().join();
+        if (g === c) localScore++; else localWrong.push(q.id);
+      });
+      if (localScore !== att.score || (att.wrong||[]).length !== localWrong.length) {
+        att.score = localScore;
+        att.pct = Math.round((localScore / qs.length) * 100);
+        att.pass = att.pct >= S.cfg.passMark;
+        att.wrong = localWrong;
+        att.answers = ASM.ans;
+        if (att.pass && !a.cert) {
+          a.cert = {ref: 'FT' + (S.certSeq++), at: Date.now(), version: S.course.version, status: 'Valid'};
+          audit(`Certificate ${a.cert.ref} issued (verified)`, 'System');
+        }
+      }
+      att.qs = ASM.qs;
+    }
+    clearASM(a.id);ASM=null;go('result',{att:id});
+  }
   catch(e){ASM.submitted=false;liveErr(e)}}
 
 // Public forms
