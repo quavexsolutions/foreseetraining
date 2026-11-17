@@ -1086,6 +1086,408 @@ html:has(#overlay .modal-bg),html:has(#overlay .modal-bg) body{overflow:hidden}
 .timeline-ed .mk{position:absolute;top:8px;transform:translateX(-50%);background:var(--teal);color:var(--btn-ink);font-family:var(--f-mono);font-size:.68rem;padding:3px 5px;border-radius:4px;border:0;cursor:pointer;white-space:nowrap}
 .timeline-ed .mk.ess{background:#B07B00;color:#fff}
 .timeline-ed .ph{position:absolute;top:0;bottom:0;width:2px;background:var(--bad)}
+
+
+/* ---------- Interactive Bundle Builder (Option 3) ---------- */
+.bb-view-toggle {
+  display: flex;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 4px;
+}
+.bb-view-toggle button {
+  background: transparent;
+  border: 0;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .2s;
+}
+.bb-view-toggle button.active {
+  background: #fff;
+  color: var(--teal);
+  box-shadow: 0 2px 6px rgba(13,33,66,0.08);
+}
+.bb-presets-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 20px;
+}
+.bb-preset-btn {
+  background: #fff;
+  border: 1px solid var(--line);
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--navy);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+  transition: all .2s;
+}
+.bb-preset-btn:hover {
+  border-color: var(--teal);
+  color: var(--teal);
+  background: var(--soft);
+}
+.bb-preset-btn.active {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+.bb-preset-btn .bb-badge {
+  background: var(--ok-bg, #ECFDF5);
+  color: var(--ok, #059669);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+.bb-preset-btn.active .bb-badge {
+  background: var(--teal-bright);
+  color: var(--navy);
+}
+.bb-tracker {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 14px rgba(13,33,66,0.03);
+}
+.bb-tracker-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.bb-tracker-title {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--navy);
+}
+.bb-tracker-status {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--ok, #059669);
+}
+.bb-tracker-steps {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin-top: 14px;
+}
+.bb-tracker-steps::before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  left: 20px;
+  right: 20px;
+  height: 4px;
+  background: var(--line);
+  z-index: 1;
+}
+.bb-tracker-fill {
+  position: absolute;
+  top: 14px;
+  left: 20px;
+  height: 4px;
+  background: var(--teal);
+  z-index: 1;
+  transition: width .35s ease;
+}
+.bb-step-node {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.bb-step-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--line);
+  display: grid;
+  place-items: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+  transition: all .25s;
+}
+.bb-step-node.completed .bb-step-circle {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: #fff;
+}
+.bb-step-node.active .bb-step-circle {
+  background: var(--teal-bright);
+  border-color: var(--teal);
+  color: var(--navy);
+  box-shadow: 0 0 0 4px rgba(43, 196, 188, 0.25);
+}
+.bb-step-label {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.bb-step-node.active .bb-step-label {
+  color: var(--teal);
+  font-weight: 700;
+}
+.bb-builder-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 28px;
+  align-items: start;
+}
+@media (max-width: 960px) {
+  .bb-builder-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.bb-course-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.bb-course-row {
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all .2s;
+  cursor: pointer;
+  user-select: none;
+}
+.bb-course-row:hover {
+  border-color: var(--teal);
+  box-shadow: 0 6px 18px rgba(13,33,66,0.05);
+}
+.bb-course-row.checked {
+  border-color: var(--teal);
+  background: #FCFDFE;
+  box-shadow: 0 4px 14px rgba(10, 126, 123, 0.08);
+}
+.bb-checkbox {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 2px solid var(--line);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  background: #fff;
+  transition: all .2s;
+}
+.bb-course-row.checked .bb-checkbox {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: #fff;
+}
+.bb-checkbox svg {
+  width: 16px;
+  height: 16px;
+}
+.bb-thumb {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.bb-course-info {
+  flex: 1;
+  min-width: 0;
+}
+.bb-course-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 1.05rem;
+  color: var(--navy);
+  font-weight: 700;
+}
+.bb-course-meta {
+  font-size: 0.8rem;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.bb-course-meta .bb-pill-cat {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--navy);
+}
+.bb-course-price {
+  text-align: right;
+  flex-shrink: 0;
+}
+.bb-course-price .amount {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--navy);
+}
+.bb-course-price .unit {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.bb-detail-link {
+  font-size: 0.78rem;
+  color: var(--teal);
+  background: transparent;
+  border: 0;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 6px;
+  font-family: inherit;
+}
+
+/* Live Summary Card */
+.bb-summary-card {
+  background: #fff;
+  border: 2px solid var(--teal);
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 10px 28px rgba(13,33,66,0.08);
+  position: sticky;
+  top: 24px;
+}
+.bb-summary-card h3 {
+  font-size: 1.25rem;
+  margin: 0 0 4px 0;
+  font-weight: 700;
+  color: var(--navy);
+}
+.bb-selected-badge {
+  background: var(--teal-light, #E6F7F6);
+  color: var(--teal);
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 3px 10px;
+  border-radius: 12px;
+  display: inline-block;
+  margin-bottom: 16px;
+}
+.bb-chosen-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.bb-chosen-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.84rem;
+  color: var(--navy);
+}
+.bb-chosen-item span.title {
+  font-weight: 500;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bb-chosen-item span.price {
+  font-weight: 700;
+  font-family: var(--f-mono);
+}
+.bb-calc-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+}
+.bb-calc-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.bb-calc-row.discount {
+  color: var(--ok, #059669);
+  font-weight: 700;
+}
+.bb-calc-row.total {
+  border-top: 1.5px solid var(--line);
+  padding-top: 10px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+.bb-calc-row.total .grand-total {
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: var(--teal);
+  font-family: var(--f-mono);
+}
+.bb-savings-pill {
+  background: var(--ok-bg, #ECFDF5);
+  border: 1px solid rgba(5,150,105,0.25);
+  color: var(--ok, #059669);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.bb-btn-order {
+  display: block;
+  width: 100%;
+  padding: 13px;
+  background: var(--teal);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  margin-bottom: 12px;
+  transition: all .2s;
+}
+.bb-btn-order:hover {
+  background: var(--teal-bright);
+  color: var(--navy);
+}
+.bb-upsell-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.4;
+  text-align: center;
+}
+
 </style>
 
 <div id="app"></div>
@@ -2480,12 +2882,278 @@ function initShowcase(){const box=$('#showcase');if(!box)return;clearInterval(SC
   if(!reduce)SC_TIMER=setInterval(()=>{if(!document.body.contains(box)){clearInterval(SC_TIMER);return}if(!hold)open(cur+1)},6000);
   open(0)}
 
-/* ---------- Courses ---------- */
-VIEWS.courses=()=>`
-<section class="wrap app-head stack" style="gap:10px"><p class="eyebrow">Course catalogue</p><h1 style="font-size:clamp(1.8rem,3.6vw,2.6rem)">Courses</h1><p class="lede">Every course combines video lessons, interactive notes, a final assessment and a certificate of completion.</p></section>
-<section class="wrap section-tight stack" style="gap:28px">
-  <div class="grid g3">${Object.values(S.courses).map(c=>courseCard(c,c.id==='sgs')).join('')}</div><div class="card stack" style="gap:12px"><h3>Planned courses</h3><p class="muted small">We are developing more courses. These are not yet available to buy.</p>${FUTURE.map(f=>`<div class="row between" style="border-top:1px solid var(--line);padding-top:12px;flex-wrap:nowrap"><div style="min-width:0"><b>${f[0]}</b><p class="small muted">${f[1]}</p></div><span class="pill">Coming later</span></div>`).join('')}</div>
+/* ---------- Courses & Interactive Bundle Builder (Option 3) ---------- */
+const BUNDLE_TIERS = [
+  { min: 1, pct: 0, label: '1 Course (0%)' },
+  { min: 2, pct: 10, label: '2 Courses (10% OFF)' },
+  { min: 3, pct: 15, label: '3 Courses (15% OFF)' },
+  { min: 4, pct: 20, label: '4 Courses (20% OFF)' },
+  { min: 5, pct: 25, label: '5 Courses (25% OFF)' },
+  { min: 6, pct: 30, label: 'All 6 Courses (30% OFF · Complete School Pass)' }
+];
+
+const BUNDLE_PRESETS = [
+  { id: 'all', label: '👑 Complete School Pass (All 6)', badge: '30% OFF', courses: ['sgs','ost','pbs','upd','osp','pbp'] },
+  { id: 'safeguarding', label: '🛡️ Safeguarding & Online Safety', badge: '20% OFF', courses: ['sgs','ost','upd'] },
+  { id: 'parents', label: '🏡 School & Home Licences', badge: '25% OFF', courses: ['osp','pbp'] },
+  { id: 'behaviour', label: '🤝 Behaviour & Culture Pack', badge: '20% OFF', courses: ['pbs','pbp'] }
+];
+
+function getBundleDiscountPct(n) {
+  if (n >= 6) return 30;
+  if (n === 5) return 25;
+  if (n === 4) return 20;
+  if (n === 3) return 15;
+  if (n === 2) return 10;
+  return 0;
+}
+
+VIEWS.courses = () => {
+  if (!S.ui.bundleCourses) S.ui.bundleCourses = ['sgs', 'ost', 'pbs', 'osp'];
+  if (!S.ui.coursesView) S.ui.coursesView = 'builder'; // 'builder' or 'grid'
+
+  const selected = S.ui.bundleCourses;
+  const isGrid = S.ui.coursesView === 'grid';
+  const allCoursesList = ['sgs', 'ost', 'pbs', 'osp', 'upd', 'pbp'].map(id => S.courses[id]).filter(Boolean);
+
+  // Calculation
+  const selCourses = selected.map(id => S.courses[id]).filter(Boolean);
+  const count = selCourses.length;
+  const discountPct = getBundleDiscountPct(count);
+  const subtotal = selCourses.reduce((sum, c) => sum + (c.price || 0), 0);
+  const discountAmt = subtotal * (discountPct / 100);
+  const total = subtotal - discountAmt;
+
+  // Active preset ID if any
+  let activePreset = '';
+  for (const p of BUNDLE_PRESETS) {
+    if (p.courses.length === selected.length && p.courses.every(id => selected.includes(id))) {
+      activePreset = p.id;
+      break;
+    }
+  }
+
+  // Progress fill percentage (0 to 100%)
+  const fillPct = count <= 1 ? 0 : count >= 6 ? 100 : Math.round(((count - 1) / 5) * 100);
+
+  return `
+<section class="wrap app-head" style="gap:10px">
+  <div class="row between" style="align-items:flex-start;flex-wrap:wrap;gap:16px">
+    <div class="stack" style="gap:6px">
+      <p class="eyebrow">Interactive Course Catalogue & Bundle Builder</p>
+      <h1 style="font-size:clamp(1.8rem,3.6vw,2.5rem)">Build Your School Training Bundle</h1>
+      <p class="lede">Select any combination of courses for your school. The more courses you bundle, the higher your automatic multi-course discount.</p>
+    </div>
+    <div class="bb-view-toggle" role="tablist" aria-label="Course catalogue view">
+      <button class="${!isGrid ? 'active' : ''}" id="btn-view-builder" type="button">${ic('layers')} Bundle Builder</button>
+      <button class="${isGrid ? 'active' : ''}" id="btn-view-grid" type="button">${ic('chart')} Grid View</button>
+    </div>
+  </div>
+
+  ${!isGrid ? `
+  <!-- Presets Bar -->
+  <div class="bb-presets-bar">
+    <span style="font-size:0.82rem;font-weight:700;color:var(--muted);align-self:center;margin-right:4px;">Quick Bundles:</span>
+    ${BUNDLE_PRESETS.map(p => `
+      <button class="bb-preset-btn ${activePreset === p.id ? 'active' : ''}" data-preset="${p.id}" type="button">
+        <span>${p.label}</span>
+        <span class="bb-badge">${p.badge}</span>
+      </button>
+    `).join('')}
+    <button class="bb-preset-btn" id="btn-clear-bundle" type="button" style="color:var(--muted);">Clear all</button>
+  </div>
+
+  <!-- Milestone Discount Tracker -->
+  <div class="bb-tracker">
+    <div class="bb-tracker-head">
+      <span class="bb-tracker-title">Tiered Multi-Course Savings Tracker</span>
+      <span class="bb-tracker-status">${count === 0 ? 'Select courses below to unlock discounts' : count >= 6 ? '🎉 Maximum 30% School Pass Discount Unlocked!' : `★ ${count} Courses Selected: ${discountPct}% Discount Active`}</span>
+    </div>
+    <div class="bb-tracker-steps">
+      <div class="bb-tracker-fill" style="width: ${fillPct}%;"></div>
+      ${BUNDLE_TIERS.map((tier, idx) => {
+        const stepNum = tier.min;
+        const isDone = count >= stepNum;
+        const isActive = count === stepNum;
+        return `
+          <div class="bb-step-node ${isActive ? 'active' : isDone ? 'completed' : ''}">
+            <div class="bb-step-circle">${isDone && !isActive ? ic('check') : stepNum}</div>
+            <div class="bb-step-label">${tier.label}</div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  </div>
+
+  <!-- Two Column Builder Workspace -->
+  <div class="bb-builder-grid">
+    <!-- Course Selector Column -->
+    <div class="bb-course-list">
+      ${allCoursesList.map(c => {
+        const isChecked = selected.includes(c.id);
+        const isLicence = !!c.licence;
+        const ph = COURSE_PH[c.id] || `${c.id}-1`;
+        return `
+          <div class="bb-course-row ${isChecked ? 'checked' : ''}" data-cid="${c.id}" role="checkbox" aria-checked="${isChecked}" tabindex="0">
+            <div class="bb-checkbox" aria-hidden="true">${isChecked ? ic('check') : ''}</div>
+            <div class="bb-thumb" style="background-image:url('media/p/${ph}.jpg');"></div>
+            <div class="bb-course-info">
+              <h4>${esc(c.title)}</h4>
+              <div class="bb-course-meta">
+                <span class="bb-pill-cat">${isLicence ? 'Whole-School Licence' : 'Staff Training'}</span>
+                <span>${esc(c.duration || 'Flexible')}</span>
+                <span>${esc(c.audienceShort || 'All staff')}</span>
+                <button class="bb-detail-link" data-go="course" data-p="${c.id}" type="button">Course details</button>
+              </div>
+            </div>
+            <div class="bb-course-price">
+              <div class="amount">${money(c.price)}</div>
+              <div class="unit">${isLicence ? 'per school/year' : 'per attendee'}</div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+
+    <!-- Live Calculation Basket Sidebar -->
+    <div class="bb-summary-card">
+      <h3>Custom Bundle Summary</h3>
+      <span class="bb-selected-badge">${count} ${count === 1 ? 'Course' : 'Courses'} Selected</span>
+
+      ${count === 0 ? `
+        <p class="small muted" style="margin:20px 0;text-align:center;">Select at least 1 course from the left to start building your school bundle.</p>
+      ` : `
+        <ul class="bb-chosen-list">
+          ${selCourses.map(c => `
+            <li class="bb-chosen-item">
+              <span class="title">${esc(c.title)}</span>
+              <span class="price">${money(c.price)}</span>
+            </li>
+          `).join('')}
+        </ul>
+
+        <div class="bb-calc-box">
+          <div class="bb-calc-row">
+            <span class="muted">Standard Subtotal</span>
+            <span class="num">${money(subtotal)}</span>
+          </div>
+          ${discountPct > 0 ? `
+            <div class="bb-calc-row discount">
+              <span>Multi-Course Discount (${discountPct}% OFF)</span>
+              <span class="num">-${money(discountAmt)}</span>
+            </div>
+          ` : ''}
+          <div class="bb-calc-row total">
+            <span>Bundle Total:</span>
+            <span class="grand-total">${money(total)}</span>
+          </div>
+        </div>
+
+        ${discountAmt > 0 ? `
+          <div class="bb-savings-pill">
+            🎉 You save ${money(discountAmt)} on this bundle!
+          </div>
+        ` : ''}
+
+        <button class="bb-btn-order" id="bb-order-btn" type="button">
+          ${S.session.role === 'school' ? 'Continue with Bundle' : 'Register & Order Bundle'}
+        </button>
+
+        ${count < 6 ? `
+          <div class="bb-upsell-note">
+            💡 <b>Save up to 30%:</b> Add ${6 - count} more ${6 - count === 1 ? 'course' : 'courses'} to unlock the Complete School Pass!
+          </div>
+        ` : `
+          <div class="bb-upsell-note" style="color:var(--ok);font-weight:600;">
+            👑 You have unlocked the full 30% Complete School Pass discount!
+          </div>
+        `}
+      `}
+    </div>
+  </div>
+  ` : `
+  <!-- Standard Grid View -->
+  <div class="notice" style="margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;">
+    <span>Looking to buy multiple courses? Use our <b>Bundle Builder</b> to save up to 30%.</span>
+    <button class="btn btn-sm btn-primary" id="btn-switch-to-builder" type="button">Switch to Bundle Builder</button>
+  </div>
+  <div class="grid g3">${Object.values(S.courses).map(c=>courseCard(c,c.id==='sgs')).join('')}</div>
+  <div class="card stack" style="gap:12px;margin-top:28px">
+    <h3>Planned courses</h3>
+    <p class="muted small">We are developing more courses. These are not yet available to buy.</p>
+    ${FUTURE.map(f=>`<div class="row between" style="border-top:1px solid var(--line);padding-top:12px;flex-wrap:nowrap"><div style="min-width:0"><b>${f[0]}</b><p class="small muted">${f[1]}</p></div><span class="pill">Coming later</span></div>`).join('')}
+  </div>
+  `}
 </section>`;
+};
+
+AFTER.courses = () => {
+  // View switcher
+  const btnBuilder = $('#btn-view-builder');
+  const btnGrid = $('#btn-view-grid');
+  const btnSwitch = $('#btn-switch-to-builder');
+
+  if (btnBuilder) btnBuilder.onclick = () => { S.ui.coursesView = 'builder'; render(); };
+  if (btnGrid) btnGrid.onclick = () => { S.ui.coursesView = 'grid'; render(); };
+  if (btnSwitch) btnSwitch.onclick = () => { S.ui.coursesView = 'builder'; render(); };
+
+  // Checkbox row clicks
+  $$('.bb-course-row').forEach(row => {
+    row.onclick = (e) => {
+      if (e.target.closest('.bb-detail-link')) return; // let course details click proceed
+      const cid = row.dataset.cid;
+      if (!cid) return;
+      if (S.ui.bundleCourses.includes(cid)) {
+        S.ui.bundleCourses = S.ui.bundleCourses.filter(x => x !== cid);
+      } else {
+        S.ui.bundleCourses.push(cid);
+      }
+      render();
+    };
+    row.onkeydown = (e) => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        row.click();
+      }
+    };
+  });
+
+  // Presets
+  $$('[data-preset]').forEach(btn => {
+    btn.onclick = () => {
+      const pid = btn.dataset.preset;
+      const preset = BUNDLE_PRESETS.find(p => p.id === pid);
+      if (preset) {
+        S.ui.bundleCourses = [...preset.courses];
+        render();
+      }
+    };
+  });
+
+  // Clear button
+  const btnClear = $('#btn-clear-bundle');
+  if (btnClear) btnClear.onclick = () => {
+    S.ui.bundleCourses = [];
+    render();
+  };
+
+  // Order button
+  const btnOrder = $('#bb-order-btn');
+  if (btnOrder) btnOrder.onclick = () => {
+    const list = S.ui.bundleCourses;
+    if (list.length === 0) {
+      toast('Please select at least one course for your bundle.');
+      return;
+    }
+    const primaryCid = list[0];
+    if (S.session.role === 'school') {
+      go('basket', { cid: primaryCid, bundle: list.join(',') });
+    } else {
+      go('register', { cid: primaryCid, bundle: list.join(',') });
+    }
+  };
+};
+
 
 /* ---------- Course detail ---------- */
 VIEWS.course=()=>{const c=S.course;if(c.licence)return licenceCourseView(c);return `
@@ -2707,7 +3375,70 @@ function asRole(r){
 }
 
 /* ---------- Basket, payment, confirmation ---------- */
-VIEWS.basket=()=>{if(!guard('school'))return false;if(subCovers(CID))return coveredBasket();if(S.course.licence)return licenceBasket();const n=Math.max(1,PARAMS.places||30);const sub=n*S.cfg.price;return `
+function bundleBasket(){
+  const list=(PARAMS.bundle||'').split(',').map(id=>S.courses[id]).filter(Boolean);
+  const count=list.length;const pct=getBundleDiscountPct(count);
+  const sub=list.reduce((sum,c)=>sum+(c.price||0),0);
+  const disc=sub*(pct/100);const total=sub-disc;
+  return `
+<section class="wrap app-head row between" style="align-items:flex-end">
+  <div class="stack" style="gap:6px">
+    <p class="eyebrow">Basket · Bundle Order</p>
+    <h1 style="font-size:clamp(1.7rem,3.4vw,2.3rem)">Confirm your School Bundle</h1>
+  </div>
+  <button class="btn btn-sm btn-outline" data-go="courses">${ic('arrow')} Modify Bundle</button>
+</section>
+<section class="wrap section-tight"><div class="split">
+  <div class="card stack" style="gap:16px">
+    <div class="row between" style="align-items:center">
+      <h3>Selected Courses (${count})</h3>
+      <span class="pill ok">${pct>0?pct+'% Multi-Course Discount Applied':'Standard Package'}</span>
+    </div>
+    <ul class="ilist" style="margin:0">
+      ${list.map(c=>`
+        <li style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);">
+          <div class="row" style="gap:10px;align-items:center;">
+            <span class="ic">${ic(COURSE_IC[c.id]||'book')}</span>
+            <div>
+              <b>${esc(c.title)}</b>
+              <span class="small muted" style="display:block;">${c.licence?'12-Month Whole-School Licence':'Staff Certification'}</span>
+            </div>
+          </div>
+          <span class="num" style="font-weight:700;">${money(c.price)}</span>
+        </li>
+      `).join('')}
+    </ul>
+    <p class="small muted">VAT: ${esc(S.cfg.vat)}. Course places and school licences are valid for 12 months from purchase.</p>
+  </div>
+  <div class="card raised stack" style="gap:12px">
+    <h3>Order Summary</h3>
+    <dl class="kv">
+      <dt>Package</dt><dd>Custom School Bundle</dd>
+      <dt>Courses</dt><dd class="num">${count}</dd>
+      <dt>Subtotal</dt><dd class="num">${money(sub)}</dd>
+      <dt>Bundle Discount</dt><dd class="num" style="color:var(--ok);font-weight:700;">${pct>0?'-'+money(disc)+' ('+pct+'%)':'None'}</dd>
+      <dt>VAT</dt><dd>${esc(S.cfg.vat)}</dd>
+    </dl>
+    <div class="hr"></div>
+    <div class="row between">
+      <b>Total payable</b>
+      <b class="num" style="font-size:1.5rem;color:var(--teal);">${money(total)}</b>
+    </div>
+    <fieldset class="stack" style="border:0;padding:0;margin:8px 0 0;gap:8px">
+      <legend class="small" style="font-weight:700;margin-bottom:6px">Payment method</legend>
+      <label class="checkbox"><input type="radio" name="pm" value="card" checked> <span><b>Card</b> · instant activation</span></label>
+      <label class="checkbox"><input type="radio" name="pm" value="invoice"> <span><b>Invoice</b> · pay by bank transfer within 30 days</span></label>
+    </fieldset>
+    <div class="field" id="po-wrap" hidden>
+      <label for="bk-po">Purchase order number (optional)</label>
+      <input type="text" id="bk-po">
+    </div>
+    <button class="btn btn-primary" id="bk-pay">Continue to payment</button>
+  </div>
+</div></section>`;
+}
+
+VIEWS.basket=()=>{if(!guard('school'))return false;if(PARAMS.bundle)return bundleBasket();if(subCovers(CID))return coveredBasket();if(S.course.licence)return licenceBasket();const n=Math.max(1,PARAMS.places||30);const sub=n*S.cfg.price;return `
 <section class="wrap app-head row between" style="align-items:flex-end"><div class="stack" style="gap:6px"><p class="eyebrow">Basket</p><h1 style="font-size:clamp(1.7rem,3.4vw,2.3rem)">Choose your places</h1></div>${courseSwitch()}</section>
 <section class="wrap section-tight"><div class="split">
  <div class="card stack" style="gap:18px"><div class="row between" style="flex-wrap:nowrap;align-items:flex-start"><div><h3>${esc(S.course.title)}</h3><p class="small muted">Version ${esc(S.course.version)} · Places valid for ${S.cfg.validityMonths} months</p></div><b class="num">${money(S.cfg.price)}</b></div>
@@ -2721,13 +3452,22 @@ VIEWS.basket=()=>{if(!guard('school'))return false;if(subCovers(CID))return cove
 </div></section>`};
 AFTER.basket=()=>{
   if(!$('#bk-pay'))return;
-  if(!$('#bk-qty')){$$('input[name=pm]').forEach(r=>r.onchange=()=>{const inv=$('input[name=pm]:checked').value==='invoice';$('#po-wrap').hidden=!inv;$('#bk-pay').textContent=inv?'Request invoice':'Continue to secure payment'});$('#bk-pay').onclick=()=>{if($('input[name=pm]:checked').value==='invoice')placeOrder(1,'Invoice',$('#bk-po').value.trim());else payModal(1)};return}
+  if(!$('#bk-qty')){
+    const bTotal = PARAMS.bundle ? (()=>{const list=PARAMS.bundle.split(',').map(id=>S.courses[id]).filter(Boolean);const s=list.reduce((sum,c)=>sum+(c.price||0),0);return s*(1 - getBundleDiscountPct(list.length)/100);})() : null;
+    $$('input[name=pm]').forEach(r=>r.onchange=()=>{const inv=$('input[name=pm]:checked').value==='invoice';$('#po-wrap').hidden=!inv;$('#bk-pay').textContent=inv?'Request invoice':'Continue to secure payment'});
+    $('#bk-pay').onclick=()=>{
+      const pm=$('input[name=pm]:checked').value;
+      if(pm==='invoice') placeOrder(1,'Invoice',$('#bk-po').value.trim(),bTotal);
+      else payModal(1, bTotal);
+    };
+    return;
+  }
   const q=$('#bk-qty');const upd=()=>{const n=Math.max(1,Math.floor(+q.value||1));$('#bk-n').textContent=n;$('#bk-sub').textContent=money(n*S.cfg.price);$('#bk-total').textContent=money(n*S.cfg.price)};q.oninput=upd;
   $$('input[name=pm]').forEach(r=>r.onchange=()=>{const inv=$('input[name=pm]:checked').value==='invoice';$('#po-wrap').hidden=!inv;$('#bk-pay').textContent=inv?'Request invoice':'Continue to secure payment'});
   $('#bk-pay').onclick=()=>{const n=Math.max(1,Math.floor(+q.value||1));const pm=$('input[name=pm]:checked').value;if(pm==='invoice')placeOrder(n,'Invoice',$('#bk-po').value.trim());else payModal(n)};
 };
-function payModal(n){if(LIVE)return placeOrder(n,'Card');
-  const total=n*S.cfg.price;
+function payModal(n,customTotal){if(LIVE)return placeOrder(n,'Card',null,customTotal);
+  const total=customTotal!=null?customTotal:n*S.cfg.price;
   const m=modal('Secure payment',`<div class="stack"><div class="notice small"><span>In the live site this step is the payment provider’s secure page. Card details never touch Foresee’s servers. This prototype takes no card details.</span></div><dl class="kv"><dt>Paying</dt><dd>${esc(S.school.name)}</dd><dt>Amount</dt><dd class="num">${money(total)}</dd></dl><div id="pay-msg"></div><div class="row" style="justify-content:flex-end"><button class="btn btn-ghost" id="pay-fail">Simulate a declined card</button><button class="btn btn-primary" id="pay-ok">Pay ${money(total)} (test)</button></div></div>`);
   $('#pay-fail',m).onclick=()=>{$('#pay-msg').innerHTML='<div class="notice bad">Your card was declined. No money has been taken. Try another card or choose invoice instead.</div>';audit('Card payment declined for '+money(total))};
   $('#pay-ok',m).onclick=e=>{const b=e.currentTarget;if(b.disabled)return;b.disabled=true;b.textContent='Confirming payment…';setTimeout(()=>{closeModal();placeOrder(n,'Card')},900)};
@@ -2859,8 +3599,8 @@ function licenceBasket(){const c=S.course,cur=licenceOrder();return `
  <div class="field" id="po-wrap" hidden><label for="bk-po">Purchase order number (optional)</label><input type="text" id="bk-po"></div>
  <button class="btn btn-primary" id="bk-pay">Continue to secure payment</button></div>
 </div></section>`}
-function placeOrder(n,method,po){if(LIVE)return liveCheckout({kind:S.course.licence?'licence':'places',course:CID,places:n,method,po:po||''});
-  const ref='FT-ORD-'+(S.orderSeq++);const total=n*S.cfg.price;
+function placeOrder(n,method,po,customAmount){if(LIVE)return liveCheckout({kind:S.course.licence?'licence':'places',course:CID,places:n,method,po:po||''});
+  const ref='FT-ORD-'+(S.orderSeq++);const total=customAmount!=null?customAmount:n*S.cfg.price;
   S.ui.cid=CID;const lic=!!S.course.licence;const o={ref,course:CID,licence:lic,places:lic?0:n,price:S.cfg.price,total,status:method==='Card'?'Paid':'Awaiting payment',method,po:po||'',at:Date.now(),invoice:'INV-'+ref.slice(7)};
   S.orders.push(o);const c=S.school.contacts[0];
   audit(`Order ${ref}: ${lic?'school licence':n+' places'}, ${money(total)}, ${o.status.toLowerCase()}`);
